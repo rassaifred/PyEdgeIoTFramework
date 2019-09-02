@@ -37,9 +37,6 @@ device-service
 mqtt-service
     image: mosquitto
 ```
-Configure service type by env var:
-
-`EDGE_SERVICE=n_service`
 
 ## Custom services
 
@@ -47,4 +44,31 @@ Configure service type by env var:
 custom-service
     folder: CustomService
 
+```
+
+# Config
+
+Configure service type by env var:
+
+`EDGE_SERVICE=n_service`
+
+the service start with line from DockerFile:
+
+`CMD ["bash", "/bin/start_edge.sh"]`
+in start_edge.sh
+```
+run_server () {
+    /usr/bin/python /server.py
+}
+
+run_device () {
+    /usr/bin/python /device.py
+}
+
+if [[ "EDGE_SERVICE" = "server" ]]; then
+    run_server
+    
+if [[ "EDGE_SERVICE" = "device" ]]; then
+    run_device
+    
 ```

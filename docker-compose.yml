@@ -1,0 +1,34 @@
+version: "2"
+services:
+
+  edge-server:
+    network_mode: "host"
+    privileged: true
+    tty: true
+    stdin_open: true
+    build:
+      context: .
+      dockerfile: DockerFile
+    environment:
+      - EDGE_SERVICE=server
+
+  device-service:
+    network_mode: "host"
+    privileged: true
+    tty: true
+    stdin_open: true
+    build:
+      context: .
+      dockerfile: DockerFile
+    environment:
+      - EDGE_SERVICE=device
+
+  mqtt-service:
+    network_mode: "host"
+    privileged: true
+    ports:
+      - 1883:1883
+      - 9001:9001
+    image: arm32v6/eclipse-mosquitto
+
+  # Custom services
