@@ -14,6 +14,30 @@ Device-service provide API
 ## Mqtt-service
 The MQTT protocol provides a lightweight method of carrying out messaging using a publish/subscribe
 
+# Config
+
+Configure device machine type by env var:
+
+`EDGE_MACHINE_TYPE=pc_linux`
+
+Docker base image by machine types
+
+`balenalib/raspberrypi3-python:3`
+
+`balenalib/raspberrypi3-debian:jessie`
+
+`balenalib/raspberrypi3-debian:stretch-run-20190612`
+
+## Machine types
+
+x86:
+- pc_linux
+- pc_win
+- mac
+
+ARM:
+- rpi
+
 # Architecture
 
 ```
@@ -46,29 +70,14 @@ custom-service
 
 ```
 
-# Config
+# Script shell
 
-Configure service type by env var:
+ls : pour lister les fichiers du répertoire.
 
-`EDGE_SERVICE=n_service`
+cd : pour changer de répertoire.
 
-the service start with line from DockerFile:
+mkdir : pour créer un répertoire.
 
-`CMD ["bash", "/bin/start_edge.sh"]`
-in start_edge.sh
-```
-run_server () {
-    /usr/bin/python /server.py
-}
+grep : pour rechercher un mot.
 
-run_device () {
-    /usr/bin/python /device.py
-}
-
-if [[ "EDGE_SERVICE" = "server" ]]; then
-    run_server
-    
-if [[ "EDGE_SERVICE" = "device" ]]; then
-    run_device
-    
-```
+sort : pour trier des mots.

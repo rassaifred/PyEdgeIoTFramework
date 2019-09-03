@@ -1,6 +1,8 @@
 version: "2"
 services:
 
+  # Edge framework services -------------------------------
+
   edge-server:
     network_mode: "host"
     privileged: true
@@ -8,9 +10,7 @@ services:
     stdin_open: true
     build:
       context: .
-      dockerfile: DockerFile
-    environment:
-      - EDGE_SERVICE=server
+      dockerfile: server/DockerFile
 
   device-service:
     network_mode: "host"
@@ -19,9 +19,7 @@ services:
     stdin_open: true
     build:
       context: .
-      dockerfile: DockerFile
-    environment:
-      - EDGE_SERVICE=device
+      dockerfile: device/DockerFile
 
   mqtt-service:
     network_mode: "host"
@@ -31,4 +29,4 @@ services:
       - 9001:9001
     image: arm32v6/eclipse-mosquitto
 
-  # Custom services
+  # Custom services -----------------------------------------
