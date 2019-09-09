@@ -1,0 +1,2 @@
+Adafruit-SSD1306 >= 1.6.2
+Pillow >= 6.1.0
