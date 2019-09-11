@@ -2,18 +2,20 @@
 # ToDo: add PubSub
 
 from threading import Thread
-from modules.PyOled import PyOled
+from gpiozero import Button, Buzzer
 
 
 class DeviceEdge(Thread):
+
+    btnGpio = 17
+    buzzGpio = 27
 
     def __init__(self):
         Thread.__init__(self)
         # ----
         print(self.__class__.__name__ + ":init")
         # ----
-        self.display = PyOled()
-        self.display.start()
+        self.bz = Buzzer(self.buzzGpio)
 
     def run(self):
         # ----
@@ -21,15 +23,10 @@ class DeviceEdge(Thread):
         # ----
         print("welcome to device")
         # ----
-
-        self.display.line_one = "hello"
-        self.display.display_lines()
-
+        self.bz.beep(0.2,1,10)
 
         while True:
             pass
-
-
 
 
 if __name__ == '__main__':

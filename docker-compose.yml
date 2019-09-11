@@ -10,7 +10,7 @@ services:
     stdin_open: true
     build:
       context: .
-      dockerfile: server/DockerFile
+      dockerfile: server/Dockerfile
 
   device-service:
     network_mode: "host"
@@ -19,7 +19,7 @@ services:
     stdin_open: true
     build:
       context: .
-      dockerfile: device/DockerFile
+      dockerfile: device/Dockerfile
 
   mqtt-service:
     network_mode: "host"
