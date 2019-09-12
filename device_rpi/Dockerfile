@@ -1,6 +1,4 @@
-ARG CACHEBUST=1
-
-FROM rassaifred/balena_rpi3_base_image
+FROM rassaifred/balena_rpi3_base_image:run
 
 # --------------------
 
