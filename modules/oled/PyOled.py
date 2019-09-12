@@ -1,3 +1,6 @@
+"""
+ToDo: replace Adafrui_ssd1306 par luma -> https://github.com/rm-hull/luma.oled
+"""
 from threading import Thread
 # import Adafruit_GPIO.SPI as SPI
 import Adafruit_SSD1306

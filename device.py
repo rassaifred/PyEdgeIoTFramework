@@ -4,19 +4,26 @@
 import os
 from threading import Thread
 import time
+from pubsub import pub
+from gpiozero import Buzzer
 import sentry_sdk
 from sentry_sdk import configure_scope
+from modules.mqtt import MqttLocalClient
 from modules.power.PyPower import PyPower
 from modules.radar.PyPing import PyPing
 from modules.oled.PyOled import PyOled
-from gpiozero import Buzzer
+from modules.buzzer import PyBuzzer
 
 
 buzzGpio = 27
-nbrConfirmPresense = 2
 
 
 class DeviceEdge(Thread):
+
+    # PubSub TOPIC
+    LOCAL_MQTT_CONNECTED_TOPIC = "local_mqtt_connected_topic"
+    RADAR_DISTANCE_TOPIC = "radar_distance_topic"
+    BUZZER_BEEP_TOPIC = "buzzer_beep_topic"
 
     def __init__(self):
         Thread.__init__(self)
@@ -34,17 +41,22 @@ class DeviceEdge(Thread):
         with configure_scope() as scope:
             scope.user = {"id": self.DEVICE_ID}
         # ----
+        self.local_mqtt_client = MqttLocalClient.MqttLocalClient()
+        # ----
+        self.local_mqtt_client.TOPICS_LIST = [
+            self.BUZZER_BEEP_TOPIC
+        ]
+        # ----
+        self.local_mqtt_client.MIROR_TOPICS_LIST = [
+            self.RADAR_DISTANCE_TOPIC
+        ]
+        # ----
         self.power_py = PyPower()
         # ----
         self.radar_py = PyPing()
         # ----
         self.oled_disp = PyOled()
         # ----
-        self.bz = Buzzer(buzzGpio)
-        # ----
-        self.presence_itt = 0
-        self.presence_no_itt = 0
-        self.presence = False
 
     def run(self):
         # ----
@@ -56,31 +68,14 @@ class DeviceEdge(Thread):
         # ----
         self.oled_disp.start()
         # ----
+        pub.subscribe(self.buzz_beep_callback, self.BUZZER_BEEP_TOPIC)
+        # ----
 
         while True:
-            if self.radar_py.distance:
-                self.oled_disp.line_one = "dist {} cm".format(int(self.radar_py.distance))
-                if int(self.radar_py.distance) > 0:
-                    if int(self.radar_py.distance) < int(80):
-                        self.presence_itt += 1
-                        if self.presence_itt >= nbrConfirmPresense:
-                            self.presence_itt = 0
-                            self.presence = True
-                            # ----
-                            self.presence_no_itt = 0
-                            # ----
-                    else:
-                        self.presence_no_itt += 1
-                        if self.presence_no_itt >= nbrConfirmPresense:
-                            self.presence_no_itt = 0
-                            self.presence = False
-                            # ----
-                            self.presence_itt = 0
-                            # ----
-            # ----
-            if self.presence:
-                self.bz.beep(.1, .1, 1)
-            time.sleep(.5)
+            pass
+
+    def buzz_beep_callback(self,payload=None):
+        PyBuzzer.buzzer_beep()
 
 
 if __name__ == '__main__':

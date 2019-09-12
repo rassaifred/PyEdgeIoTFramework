@@ -3,17 +3,23 @@ It requires only 3 wires to connect it to the Pi.
 One is +5V which can be grabbed directly from pin 2 of the Raspberry Pi,
 one is Ground, which is provided on pin 4,
 and the third is pin 11
+ToDo: catch error discontinued mesurment
 
 """
+
 from threading import Thread
 import time
+from pubsub import pub
 import RPi.GPIO as GPIO
 
+RADAR_DISTANCE_TOPIC = "radar_distance"
 
 # Use board based pin numbering
 # GPIO.setmode(GPIO.BOARD)
 
 sigGpio = 17
+
+sigInterval = .5
 
 
 def read_distance(pin):
@@ -62,5 +68,12 @@ class PyPing(Thread):
         while True:
             self.distance = read_distance(sigGpio)
             # print("Distance to object is ", distance, " cm or ", distance * .3937, " inches")
-            time.sleep(.5)
+            # ----
+            pub.sendMessage(
+                RADAR_DISTANCE_TOPIC,
+                topic= RADAR_DISTANCE_TOPIC,
+                payload=str(self.distance)
+            )
+            # ----
+            time.sleep(sigInterval)
 
