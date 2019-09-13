@@ -7,19 +7,24 @@ ToDo: catch error discontinued mesurment
 
 """
 
+import os
 from threading import Thread
 import time
 from pubsub import pub
 import RPi.GPIO as GPIO
+import sentry_sdk
+from sentry_sdk import configure_scope
 
-RADAR_DISTANCE_TOPIC = "radar_distance"
+
+RADAR_DISTANCE_TOPIC = "radar_distance_topic"
+
 
 # Use board based pin numbering
 # GPIO.setmode(GPIO.BOARD)
 
 sigGpio = 17
-
 sigInterval = .5
+maxTime = 0.04
 
 
 def read_distance(pin):
@@ -40,10 +45,17 @@ def read_distance(pin):
 
     GPIO.setup(pin, GPIO.IN)
 
-    while GPIO.input(pin) == 0:
+    starttime = time.time()
+    timeout = starttime + maxTime
+
+    # while GPIO.input(pin) == 0:
+    while GPIO.input(pin) == 0 and starttime < timeout:
         starttime = time.time()
 
-    while GPIO.input(pin) == 1:
+    endtime = time.time()
+    timeout = endtime + maxTime
+    # while GPIO.input(pin) == 1:
+    while GPIO.input(pin) == 1 and endtime < timeout:
         endtime = time.time()
 
     duration = endtime - starttime
@@ -59,21 +71,37 @@ class PyPing(Thread):
         # ----
         print(self.__class__.__name__ + ":init")
         # ----
+        self.DEVICE_ID = "virtual_dev_{0}".format(os.name)
+        # ---
+        if os.getenv('CUSTOM_DEVICE_ID'):
+            self.DEVICE_ID = os.getenv('CUSTOM_DEVICE_ID')
+        # ---
+        print("DEVICE_ID: " + self.DEVICE_ID)
+        sentry_sdk.init("https://dc448482f0154329a104fff05357d008@sentry.io/1551410")
+        # ---
+        with configure_scope() as scope:
+            scope.user = {"id": self.DEVICE_ID}
+        # ----
         self.distance = -1
+        # ----
 
     def run(self):
         # ----
         print(self.__class__.__name__ + ":run")
         # ----
         while True:
-            self.distance = read_distance(sigGpio)
+            try:
+                self.distance = read_distance(sigGpio)
+            except:
+                print("error to ping")
             # print("Distance to object is ", distance, " cm or ", distance * .3937, " inches")
             # ----
             pub.sendMessage(
                 RADAR_DISTANCE_TOPIC,
-                topic= RADAR_DISTANCE_TOPIC,
+                topic=RADAR_DISTANCE_TOPIC,
                 payload=str(self.distance)
             )
             # ----
+
             time.sleep(sigInterval)
 

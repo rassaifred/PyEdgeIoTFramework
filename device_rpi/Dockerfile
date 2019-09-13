@@ -1,4 +1,4 @@
-FROM rassaifred/balena_rpi3_base_image:run
+FROM rassaifred/balena_rpi3_base_image
 
 # --------------------
 

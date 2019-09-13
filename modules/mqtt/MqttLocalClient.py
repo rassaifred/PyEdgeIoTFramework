@@ -68,9 +68,9 @@ class MqttLocalClient(Thread):
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):
         # ----
-        print('Local Mqtt receive topic "%s": %s brocker: %s at adress: %s' % (msg.topic, str(msg.payload), self.BROCKER_NAME,self.MQTT_BROCKER_ADRESS))
+        # print('Local Mqtt receive topic "%s": %s brocker: %s at adress: %s' % (msg.topic, str(msg.payload), self.BROCKER_NAME,self.MQTT_BROCKER_ADRESS))
         pub.sendMessage(msg.topic, payload=msg.payload)
 
     def on_mirror_message(self, topic=None, payload=None):
-        print('local mqtt mirror topic "%s"' % topic)
+        # print('local mqtt mirror topic "%s"' % topic)
         self.client.publish(topic, payload)

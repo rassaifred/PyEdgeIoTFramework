@@ -3,9 +3,7 @@
 
 import os
 from threading import Thread
-import time
 from pubsub import pub
-from gpiozero import Buzzer
 import sentry_sdk
 from sentry_sdk import configure_scope
 from modules.mqtt import MqttLocalClient
@@ -62,20 +60,24 @@ class DeviceEdge(Thread):
         # ----
         print(self.__class__.__name__ + ":run")
         # ----
-        self.power_py.start()
+        self.local_mqtt_client.start()
         # ----
-        self.radar_py.start()
-        # ----
-        self.oled_disp.start()
-        # ----
+        pub.subscribe(self.startup, self.LOCAL_MQTT_CONNECTED_TOPIC)
         pub.subscribe(self.buzz_beep_callback, self.BUZZER_BEEP_TOPIC)
         # ----
-
         while True:
             pass
 
     def buzz_beep_callback(self,payload=None):
         PyBuzzer.buzzer_beep()
+
+    def startup(self,payload=None):
+        # ----
+        self.power_py.start()
+        # ----
+        self.radar_py.start()
+        # ----
+        self.oled_disp.start()
 
 
 if __name__ == '__main__':
