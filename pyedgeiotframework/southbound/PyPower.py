@@ -1,5 +1,5 @@
-from threading import Thread
 import os
+from pyedgeiotframework.core.EdgeService import EdgeService
 from gpiozero import Button
 
 pwrBtnGpio = 22
@@ -41,19 +41,17 @@ def reboot():
         print("impossible d'executer dbus-send reboot")
 
 
-class PyPower(Thread):
+class PyPower(EdgeService):
 
     def __init__(self):
-        Thread.__init__(self)
-        # ----
-        print(self.__class__.__name__ + ":init")
+        EdgeService.__init__(self)
         # ----
         self.myButton = Button(pwrBtnGpio)
         # ----
 
     def run(self):
         # ----
-        print(self.__class__.__name__ + ":run")
+        EdgeService.run(self)
         # ----
         self.myButton.when_released = self.btn_release
         # ----

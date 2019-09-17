@@ -1,7 +1,7 @@
 """
 ToDo: replace Adafrui_ssd1306 par luma -> https://github.com/rm-hull/luma.oled
 """
-from threading import Thread
+from pyedgeiotframework.core.EdgeService import EdgeService
 from pubsub import pub
 # import Adafruit_GPIO.SPI as SPI
 import Adafruit_SSD1306
@@ -11,12 +11,11 @@ from PIL import ImageDraw
 from PIL import ImageFont
 
 
-class PyOled(Thread):
+class PyOled(EdgeService):
 
     def __init__(self):
-        Thread.__init__(self)
         # ----
-        print(self.__class__.__name__ + ":init")
+        EdgeService.__init__(self)
         # ----
         self.RST = None  # on the PiOLED this pin isnt used
         self.display_connected = False
@@ -78,7 +77,7 @@ class PyOled(Thread):
 
     def run(self):
         # ----
-        print(self.__class__.__name__ + ":run")
+        EdgeService.run(self)
         # ----
         while self.display_connected:
             # Draw a black filled box to clear the image.
