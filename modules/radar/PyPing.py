@@ -23,7 +23,7 @@ RADAR_DISTANCE_TOPIC = "radar_distance_topic"
 # GPIO.setmode(GPIO.BOARD)
 
 sigGpio = 17
-sigInterval = .5
+sigInterval = .2
 maxTime = 0.04
 
 
