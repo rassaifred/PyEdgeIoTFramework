@@ -1,5 +1,9 @@
+"""
+ToDo: replace Adafrui_ssd1306 par luma -> https://github.com/rm-hull/luma.oled
+"""
 from threading import Thread
-import Adafruit_GPIO.SPI as SPI
+from pubsub import pub
+# import Adafruit_GPIO.SPI as SPI
 import Adafruit_SSD1306
 
 from PIL import Image
@@ -26,7 +30,7 @@ class PyOled(Thread):
         self.line_seven = ""
         self.line_eight = ""
 
-        self.power_on = True;
+        self.power_on = True
         # 128x64 display with hardware I2C:
         self.disp = Adafruit_SSD1306.SSD1306_128_64(rst=self.RST)
 
