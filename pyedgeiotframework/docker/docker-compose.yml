@@ -1,0 +1,36 @@
+version: "2"
+services:
+
+  # Edge framework services -------------------------------
+
+  mqtt-service:
+    network_mode: "host"
+    privileged: true
+    tty: true
+    stdin_open: true
+    ports:
+      - 1883:1883
+      - 9001:9001
+    image: arm32v6/eclipse-mosquitto
+
+  # Custom services -----------------------------------------
+
+  example-service:
+    network_mode: "host"
+    privileged: true
+    tty: true
+    stdin_open: true
+    build:
+      context: ./example
+      dockerfile: Dockerfile
+    volumes:
+      - device-data:/data
+    environment:
+      - example=value
+    depends_on:
+      - mqtt-service
+    labels:
+      io.balena.features.dbus: '1'
+
+volumes:
+  device-data:
