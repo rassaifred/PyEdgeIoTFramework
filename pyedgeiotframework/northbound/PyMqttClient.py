@@ -1,35 +1,44 @@
-from threading import Thread
+"""
+ToDo: clean up
+ToDo: add subscribe_mqtt_topic --> mirror to --> PyPubSub
+
+"""
+
 import paho.mqtt.client as mqtt
 from pubsub import pub
 import os
+from pyedgeiotframework.core.EdgeService import EdgeService
 
 
-class MqttLocalClient(Thread):
+class PyMqttClient(EdgeService):
 
     MQTT_BROCKER_ADRESS = "localhost"
     if os.getenv("MQTT_BROCKER_ADRESS"):
         MQTT_BROCKER_ADRESS = os.getenv("MQTT_BROCKER_ADRESS")
-    
+
     MQTT_BROCKER_PORT = 1883
     MQTT_KEEPALIVE = 60
 
     LOCAL_MQTT_CONNECTED_TOPIC = "local_mqtt_connected_topic"
-    
+
     TOPICS_LIST = []
     MIROR_TOPICS_LIST = []
 
-    BROCKER_NAME = "local"
+    REMOTE_TYPE = "remote"
+    LOCAL_TYPE = "local"
+
+    BROCKER_NAME = LOCAL_TYPE
 
     def __init__(self):
-        Thread.__init__(self)
         # ----
-        print(self.__class__.__name__ + ":init")
+        EdgeService.__init__(self)
         # ----
         self.client = mqtt.Client()
         # ----
 
     def run(self):
-        print(self.__class__.__name__ + ":run")
+        # ----
+        EdgeService.run(self)
         # ----
         if len(self.MIROR_TOPICS_LIST) > 0:
             for mirror_topic_item in self.MIROR_TOPICS_LIST:
@@ -47,7 +56,7 @@ class MqttLocalClient(Thread):
         # ----
         while True:
             pass
-        
+
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc):
         print("Local Mqtt Connected with result code {0} to brocker: {1} at adress: {2}".format(str(rc), self.BROCKER_NAME, self.MQTT_BROCKER_ADRESS))
@@ -63,7 +72,11 @@ class MqttLocalClient(Thread):
                 print("local mqtt subscribe to topic:{}".format(topic_item))
                 self.client.subscribe(str(topic_item))
         # ----
-        pub.sendMessage(self.LOCAL_MQTT_CONNECTED_TOPIC)
+        if self.BROCKER_NAME is self.LOCAL_TYPE:
+            pub.sendMessage(self.LOCAL_MQTT_CONNECTED_TOPIC)
+        else:
+            pub.sendMessage(self.REMOTE_MQTT_CONNECTED_TOPIC)
+
 
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):

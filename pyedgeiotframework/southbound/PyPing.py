@@ -7,8 +7,7 @@ ToDo: catch error discontinued mesurment
 
 """
 
-import os
-from threading import Thread
+from pyedgeiotframework.core.EdgeService import EdgeService
 import time
 from pubsub import pub
 import RPi.GPIO as GPIO
@@ -62,30 +61,17 @@ def read_distance(pin):
     return distance
 
 
-class PyPing(Thread):
+class PyPing(EdgeService):
 
     def __init__(self):
-        Thread.__init__(self)
-        # ----
-        print(self.__class__.__name__ + ":init")
-        # ----
-        self.DEVICE_ID = "virtual_dev_{0}".format(os.name)
-        # ---
-        if os.getenv('CUSTOM_DEVICE_ID'):
-            self.DEVICE_ID = os.getenv('CUSTOM_DEVICE_ID')
-        # ---
-        print("DEVICE_ID: " + self.DEVICE_ID)
-        sentry_sdk.init("https://dc448482f0154329a104fff05357d008@sentry.io/1551410")
-        # ---
-        with configure_scope() as scope:
-            scope.user = {"id": self.DEVICE_ID}
+        EdgeService.__init__(self)
         # ----
         self.distance = -1
         # ----
 
     def run(self):
         # ----
-        print(self.__class__.__name__ + ":run")
+        EdgeService.run(self)
         # ----
         while True:
             try:
