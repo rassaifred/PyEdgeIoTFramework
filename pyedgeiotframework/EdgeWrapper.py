@@ -57,6 +57,8 @@ class EdgeWrapper:
             instance.start()
 
 
+"""
 if __name__ == '__main__':
     mainWrapper = EdgeWrapper()
     mainWrapper.startup_wrapper()
+"""
