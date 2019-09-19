@@ -82,7 +82,7 @@ class PyOmxplayer(EdgeService):
         # ----
 
     def play_next_asset(self):
-        print("play next asset")
+        #print("play next asset")
         # ----
         self.curr_index += 1
         # ----
@@ -123,7 +123,7 @@ class PyOmxplayer(EdgeService):
 
     def update_playlist(self, payload=None):
         # ----
-        print("update playlist", payload)
+        #print("update playlist", payload)
         # ----
         data = None
         try:
@@ -147,7 +147,8 @@ class PyOmxplayer(EdgeService):
 
     def mute(self):
         if self.mutting:
-            print("deja mute")
+            # print("deja mute")
+            pass
         else:
             print("mute")
             self.mutting = True
@@ -155,11 +156,12 @@ class PyOmxplayer(EdgeService):
 
     def unmute(self):
         if self.mutting:
-            print("unmute")
+            #print("unmute")
             self.mutting = False
             self.player.set_volume(1)
         else:
-            print("deja unmute")
+            #print("deja unmute")
+            pass
 
     def exit_callback(self):
         #print("event Exit ")

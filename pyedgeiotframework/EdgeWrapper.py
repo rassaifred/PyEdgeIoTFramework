@@ -15,8 +15,6 @@ class EdgeWrapper:
         # ----
         print(self.__class__.__name__ + ":init")
         # ----
-        self.SENTRY_URL = None
-        # ----
         if os.getenv('SENTRY_URL'):
             self.SENTRY_URL = os.getenv('SENTRY_URL')
         # ----
