@@ -20,7 +20,7 @@ class EdgeService(Thread):
         # ----
 
     def dispatch_event(self, topic=None, payload=None):
-        pub.sendMessage(topic=topic, payload=payload)
+        pub.sendMessage(topicName=topic, payload=payload)
 
     def subscribe_command(self, callback=None, topic=None):
         if topic and callback:

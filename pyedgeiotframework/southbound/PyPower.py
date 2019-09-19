@@ -1,5 +1,5 @@
 import os
-from pyedgeiotframework.core.EdgeService import EdgeService
+from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
 from gpiozero import Button
 
 pwrBtnGpio = 22

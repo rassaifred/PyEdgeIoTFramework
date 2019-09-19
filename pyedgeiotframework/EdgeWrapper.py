@@ -8,6 +8,9 @@ import signal
 
 class EdgeWrapper:
 
+    SENTRY_URL = None
+    DEVICE_ID = None
+
     def __int__(self):
         # ----
         print(self.__class__.__name__ + ":init")

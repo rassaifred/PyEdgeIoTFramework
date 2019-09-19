@@ -8,7 +8,7 @@ ToDo: add download mode
 
 import json
 from omxplayer.player import OMXPlayer
-from pyedgeiotframework.core.EdgeService import EdgeService
+from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
 
 
 class PyOmxplayer(EdgeService):
@@ -25,13 +25,13 @@ class PyOmxplayer(EdgeService):
     current_playlist = []
     curr_index = -1
 
+    player = None
+    mutting = True
+    voltmp = '0'
+
     def __int__(self):
         # ----
         EdgeService.__init__(self)
-        # ----
-        self.player = None
-        self.mutting = True
-        self.voltmp = '0'
         # ----
 
     def run(self) -> None:
@@ -123,9 +123,16 @@ class PyOmxplayer(EdgeService):
 
     def update_playlist(self, payload=None):
         # ----
-        # print("update playlist", payload)
+        print("update playlist", payload)
         # ----
-        data = json.loads(payload.decode("utf-8"))
+        data = None
+        try:
+            data = json.loads(payload.decode("utf-8"))
+        except:
+            try:
+                data = json.loads(payload)
+            except:
+                print("data error")
         # ----
         # print("data:", data)
         # ----

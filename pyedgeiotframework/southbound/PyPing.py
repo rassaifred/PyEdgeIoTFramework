@@ -7,7 +7,7 @@ ToDo: catch error discontinued mesurment
 
 """
 
-from pyedgeiotframework.core.EdgeService import EdgeService
+from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
 import time
 from pubsub import pub
 import RPi.GPIO as GPIO
@@ -61,12 +61,14 @@ def read_distance(pin):
     return distance
 
 
+distance = -1
+
+
 class PyPing(EdgeService):
 
     def __init__(self):
         EdgeService.__init__(self)
         # ----
-        self.distance = -1
         # ----
 
     def run(self):
@@ -80,8 +82,7 @@ class PyPing(EdgeService):
                 print("error to ping")
             # print("Distance to object is ", distance, " cm or ", distance * .3937, " inches")
             # ----
-            pub.sendMessage(
-                RADAR_DISTANCE_TOPIC,
+            self.dispatch_event(
                 topic=RADAR_DISTANCE_TOPIC,
                 payload=str(self.distance)
             )

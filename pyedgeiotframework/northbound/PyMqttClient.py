@@ -7,7 +7,7 @@ ToDo: add subscribe_mqtt_topic --> mirror to --> PyPubSub
 import paho.mqtt.client as mqtt
 from pubsub import pub
 import os
-from pyedgeiotframework.core.EdgeService import EdgeService
+from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
 
 
 class PyMqttClient(EdgeService):
