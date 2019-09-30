@@ -1,3 +1,7 @@
+"""
+ToDo: add services manager, to control stating and kill services (threads)
+"""
+
 import os
 import sentry_sdk
 from sentry_sdk import configure_scope
