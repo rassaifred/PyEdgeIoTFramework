@@ -44,6 +44,7 @@ class PyYsIrtm(EdgeService):
                     print(list(data))
 
     def send_command(self, payload=None):
+        print("send_ir_command")
         if payload:
             data = binascii.unhexlify(payload)
             sys.stdout.write('sending')
