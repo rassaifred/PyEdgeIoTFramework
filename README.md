@@ -93,11 +93,12 @@ custom-service
 ```
 ## Script shell
 
--ls : pour lister les fichiers du répertoire.
--cd : pour changer de répertoire.
--mkdir : pour créer un répertoire.
--grep : pour rechercher un mot.
--sort : pour trier des mots.
+Commands:
+- ls: pour lister les fichiers du répertoire.
+- cd: pour changer de répertoire.
+- mkdir: pour créer un répertoire.
+- grep: pour rechercher un mot.
+- sort: pour trier des mots.
 
 ## ToDo
 - ToDo: Add MercurryAPI service
