@@ -1,4 +1,4 @@
-# Edge IOT Framework
+# Python Edge IoT Framework
 
 ## Description
 
@@ -6,7 +6,7 @@ The system based on micro services architecture, and it is:
 - event driven design
 - platform agnostic
 
-
+```
 EdgeWrapper ==> MicroService:
 mode:
     - solo mode (single device no distributed system)
@@ -23,7 +23,7 @@ EdgeService ==> SoftwareService:
 context: Host
 Components:
     - API registry to EdgeWrapper (using Flask & Blueprint)
-
+```
 
 ## La clé se n'est pas le code, mais l'architecture
 
@@ -64,16 +64,18 @@ ARM:
 
 ## Architecture
 
+```
 CustomProject
     /-- PyEdgeIoTFramework
     /-- CustomService
     docker-compose.yml
-
+```
 
 ## Docker-compose
 
 ## Edge services
 
+```
 edge-server
     folder: PyEdgeIoTFramework
     env_avr: server
@@ -82,15 +84,13 @@ device-service
     env_avr: device
 mqtt-service
     image: mosquitto
-
-
+```
 ## Custom services
 
-
+```
 custom-service
     folder: CustomService
-
-
+```
 ## Script shell
 
 -ls : pour lister les fichiers du répertoire.
