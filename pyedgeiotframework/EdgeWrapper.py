@@ -1,5 +1,9 @@
 """
 ToDo: add services manager, to control stating and kill services (threads)
+ToDo: add DislayRenderer select base renderer by platform and media type
+ToDo: OmXRenderer only exist
+ToDo: add DesktopRenderer
+ToDo: add HtmlRenderer
 
 Description:
 
