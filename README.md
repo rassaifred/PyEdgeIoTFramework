@@ -1,32 +1,31 @@
-#ToDo
-- ToDo: Add MercurryAPI service
-
-# La clé se n'est pas le code, mais l'architecture
+# Edge IOT Framework
 
 ## Description
+
 The system based on micro services architecture, and it is:
 - event driven design
 - platform agnostic
 
 
-```
-    EdgeWrapper ==> MicroService:
-        mode:
-            - solo mode (single device no distributed system)
-            - network mode (multiple devices, as distributed system)
-        context: Local Network
-        Components:
-            - software services tree
-            - Web server
-            - API (end points for every PyService)
-            - Dashboard
-            - Admin (for every PyService)
+EdgeWrapper ==> MicroService:
+mode:
+    - solo mode (single device no distributed system)
+    - network mode (multiple devices, as distributed system)
+context: Local Network
+Components:
+    - software services tree
+    - Web server
+    - API (end points for every PyService)
+    - Dashboard
+    - Admin (for every PyService)
 
-    EdgeService ==> SoftwareService:
-        context: Host
-        Components:
-            - API registry to EdgeWrapper (using Flask & Blueprint)`
-```
+EdgeService ==> SoftwareService:
+context: Host
+Components:
+    - API registry to EdgeWrapper (using Flask & Blueprint)
+
+
+## La clé se n'est pas le code, mais l'architecture
 
 ## Edge-server
 Services manager, provide API, B.O, WebUI, admin, dashboard.
@@ -39,7 +38,7 @@ Device-service provide API
 ## Mqtt-service
 The MQTT protocol provides a lightweight method of carrying out messaging using a publish/subscribe
 
-# Config
+## Config
 
 Configure device machine type by env var:
 
@@ -63,20 +62,18 @@ x86:
 ARM:
 - rpi
 
-# Architecture
+## Architecture
 
-```
 CustomProject
     /-- PyEdgeIoTFramework
     /-- CustomService
     docker-compose.yml
-```
 
-# Docker-compose
+
+## Docker-compose
 
 ## Edge services
 
-```
 edge-server
     folder: PyEdgeIoTFramework
     env_avr: server
@@ -85,24 +82,22 @@ device-service
     env_avr: device
 mqtt-service
     image: mosquitto
-```
+
 
 ## Custom services
 
-```
+
 custom-service
     folder: CustomService
 
-```
 
-# Script shell
+## Script shell
 
-ls : pour lister les fichiers du répertoire.
+-ls : pour lister les fichiers du répertoire.
+-cd : pour changer de répertoire.
+-mkdir : pour créer un répertoire.
+-grep : pour rechercher un mot.
+-sort : pour trier des mots.
 
-cd : pour changer de répertoire.
-
-mkdir : pour créer un répertoire.
-
-grep : pour rechercher un mot.
-
-sort : pour trier des mots.
+## ToDo
+- ToDo: Add MercurryAPI service
