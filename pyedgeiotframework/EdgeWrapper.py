@@ -4,8 +4,12 @@ ToDo: add services manager, to control stating and kill services (threads)
 Description:
 
     EdgeWrapper ==> MicroService:
+        mode:
+            - solo mode (single device no distributed system)
+            - network mode (multiple devices, as distributed system)
         context: Local Network
         Components:
+            - software services tree
             - Web server
             - API (end points for every PyService)
             - Dashboard
@@ -14,7 +18,7 @@ Description:
     EdgeService ==> SoftwareService:
         context: Host
         Components:
-            - API regestry to EdgeWrapper (using Flask & Blueprint)
+            - API registry to EdgeWrapper (using Flask & Blueprint)
 
 """
 

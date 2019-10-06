@@ -1,4 +1,5 @@
-ToDo: Add MercurryAPI service
+#ToDo
+- ToDo: Add MercurryAPI service
 
 # La clé se n'est pas le code, mais l'architecture
 
@@ -6,6 +7,24 @@ ToDo: Add MercurryAPI service
 The system based on micro services architecture, and it is:
 - event driven design
 - platform agnostic
+
+
+    EdgeWrapper ==> MicroService:
+        mode:
+            - solo mode (single device no distributed system)
+            - network mode (multiple devices, as distributed system)
+        context: Local Network
+        Components:
+            - software services tree
+            - Web server
+            - API (end points for every PyService)
+            - Dashboard
+            - Admin (for every PyService)
+
+    EdgeService ==> SoftwareService:
+        context: Host
+        Components:
+            - API registry to EdgeWrapper (using Flask & Blueprint)
 
 ## Edge-server
 Services manager, provide API, B.O, WebUI, admin, dashboard.
