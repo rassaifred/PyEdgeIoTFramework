@@ -1,5 +1,21 @@
 """
 ToDo: add services manager, to control stating and kill services (threads)
+
+Description:
+
+    EdgeWrapper ==> MicroService:
+        context: Local Network
+        Components:
+            - Web server
+            - API (end points for every PyService)
+            - Dashboard
+            - Admin (for every PyService)
+
+    EdgeService ==> SoftwareService:
+        context: Host
+        Components:
+            - API regestry to EdgeWrapper (using Flask & Blueprint)
+
 """
 
 import os
