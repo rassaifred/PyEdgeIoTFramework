@@ -9,6 +9,7 @@ The system based on micro services architecture, and it is:
 - platform agnostic
 
 
+```
     EdgeWrapper ==> MicroService:
         mode:
             - solo mode (single device no distributed system)
@@ -24,7 +25,8 @@ The system based on micro services architecture, and it is:
     EdgeService ==> SoftwareService:
         context: Host
         Components:
-            - API registry to EdgeWrapper (using Flask & Blueprint)
+            - API registry to EdgeWrapper (using Flask & Blueprint)`
+```
 
 ## Edge-server
 Services manager, provide API, B.O, WebUI, admin, dashboard.
