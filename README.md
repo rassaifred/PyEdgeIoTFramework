@@ -25,17 +25,15 @@ Components:
     - API registry to EdgeWrapper (using Flask & Blueprint)
 ```
 
-## La clé se n'est pas le code, mais l'architecture
-
-## Edge-server
+### Edge-server
 Services manager, provide API, B.O, WebUI, admin, dashboard.
 
-## Device-service
+### Device-service
 Sensor data is collected by a Device Service from a thing, and published in Mqtt-service.
 
 Device-service provide API
 
-## Mqtt-service
+### Mqtt-service
 The MQTT protocol provides a lightweight method of carrying out messaging using a publish/subscribe
 
 ## Config
@@ -63,6 +61,8 @@ ARM:
 - rpi
 
 ## Architecture
+
+La clé se n'est pas le code, mais l'architecture
 
 ```
 CustomProject
