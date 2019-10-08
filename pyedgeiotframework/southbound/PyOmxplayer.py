@@ -1,8 +1,9 @@
 """
 ToDo: (issue critic) omxplayer dbus lose connection
 ToDo: add default media
-ToDo: add idle mode
-ToDo: add download mode
+ToDo: add idle state
+ToDo: add download state
+ToDo:
 
 """
 
@@ -17,7 +18,7 @@ class PyOmxplayer(EdgeService):
     CURRENT_VIDEO_CHANGE_TOPIC = "current_video_change_topic"
     LOCAL_PLAYLIST_READY_TOPIC = "local_playlist_ready_topic"
     MUTE_TOPIC = "mute_topic"
-    RENDRER_IS_READY_TOPIC = "rendrer_is_ready_topic"
+    RENDRER_IS_READY_TOPIC = "renderer_is_ready_topic"
 
     # PubSub TOPIC
     LOCAL_MQTT_CONNECTED_TOPIC = "local_mqtt_connected_topic"

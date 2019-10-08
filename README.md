@@ -6,6 +6,8 @@ The system based on micro services architecture, and it is:
 - event driven design
 - platform agnostic
 
+flexibility and resilience
+
 ```
 EdgeWrapper ==> MicroService:
 mode:

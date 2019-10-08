@@ -4,9 +4,9 @@ ToDo: add subscribe_mqtt_topic --> mirror to --> PyPubSub
 
 """
 
+import os
 import paho.mqtt.client as mqtt
 from pubsub import pub
-import os
 from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
 
 
@@ -76,7 +76,6 @@ class PyMqttClient(EdgeService):
             pub.sendMessage(self.LOCAL_MQTT_CONNECTED_TOPIC)
         else:
             pub.sendMessage(self.REMOTE_MQTT_CONNECTED_TOPIC)
-
 
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):
