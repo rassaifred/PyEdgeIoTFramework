@@ -53,7 +53,7 @@ class PySocketIOClient(EdgeService):
             for topic_item in self.TOPICS_LIST:
                 print("socketIO subscribe to topic:{}".format(topic_item))
                 # self.client.subscribe(str(topic_item))
-                self.sio.on("message", namespace=str(topic_item), handler=self.message_handler)
+                self.sio.register_namespace(EdgeClientNamespace(str(topic_item)))
         # ----
         pub.sendMessage(self.SOCKET_IO_CONNECTED_TOPIC)
         # ----
@@ -72,3 +72,14 @@ class PySocketIOClient(EdgeService):
     def on_mirror_message(self, topic=None, payload=None):
         # print('socketIO mirror topic "%s"' % topic)
         self.sio.send(payload, namespace=topic)
+
+
+class EdgeClientNamespace(socketio.ClientNamespace):
+    def on_connect(self):
+        pass
+
+    def on_disconnect(self):
+        pass
+
+    def on_message(self):
+        pass
