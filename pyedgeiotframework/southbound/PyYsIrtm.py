@@ -13,7 +13,8 @@ class PyYsIrtm(EdgeService):
     connected = False
     baselist = [0xA1, 0xF1]
     baud = 9600
-    serial_port = serial.Serial(serialport, baud, timeout=1)
+    # serial_port = serial.Serial(serialport, baud, timeout=1)
+    serial_port = None
     runLoop = True
 
     def __int__(self):
@@ -26,6 +27,8 @@ class PyYsIrtm(EdgeService):
         EdgeService.run(self)
         # ----
         # self.send_command([0x32, 0xcd, 0x81])
+        # ----
+        self.serial_port = serial.Serial(self.serialport, baud, timeout=1)
         # ----
         self.subscribe_command(
             callback=self.send_command,

@@ -37,6 +37,10 @@ class PySocketIOClient(EdgeService):
         # ---
         try:
             self.sio.connect("{0}:{1}".format(self.SOCKET_IO_SERVER_ADRESS, self.SOCKET_IO_PORT))
+            # ---
+            self.sio.on('connect', self.connect_handler)
+            self.sio.on('message', self.message_handler)
+            # ---
         except ConnectionRefusedError:
             print("ConnectionRefusedError")
         # ---
@@ -44,7 +48,7 @@ class PySocketIOClient(EdgeService):
             pass
         # ---
 
-    @sio.on('connect')
+    # @sio.on('connect')
     def connect_handler(self):
         # ----
         print('Connected!')
@@ -58,7 +62,7 @@ class PySocketIOClient(EdgeService):
         pub.sendMessage(self.SOCKET_IO_CONNECTED_TOPIC)
         # ----
 
-    @sio.on('disconnect')
+    # @sio.on('disconnect')
     def disconnect_handler(self):
         # ----
         print('Disconnect!')

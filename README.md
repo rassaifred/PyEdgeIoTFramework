@@ -103,4 +103,5 @@ Commands:
 - sort: pour trier des mots.
 
 ## ToDo
-- ToDo: Add MercurryAPI service
+- ToDo: Add PySse service (like mqtt)
+- ToDo: Add PyMplayer service (like omxplayer)

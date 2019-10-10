@@ -20,6 +20,7 @@ class PyMqttClient(EdgeService):
     MQTT_KEEPALIVE = 60
 
     LOCAL_MQTT_CONNECTED_TOPIC = "local_mqtt_connected_topic"
+    REMOTE_MQTT_CONNECTED_TOPIC = "remote_mqtt_connected_topic"
 
     TOPICS_LIST = []
     MIROR_TOPICS_LIST = []
@@ -42,6 +43,7 @@ class PyMqttClient(EdgeService):
         # ----
         if len(self.MIROR_TOPICS_LIST) > 0:
             for mirror_topic_item in self.MIROR_TOPICS_LIST:
+                print("pypubsub subscribe to topic:{}".format(mirror_topic_item))
                 pub.subscribe(self.on_mirror_message, str(mirror_topic_item))
         # ----
         self.client.on_connect = self.on_connect
@@ -69,7 +71,7 @@ class PyMqttClient(EdgeService):
         # ----
         if len(self.TOPICS_LIST) > 0:
             for topic_item in self.TOPICS_LIST:
-                print("local mqtt subscribe to topic:{}".format(topic_item))
+                print("mqtt subscribe to topic:{}".format(topic_item))
                 self.client.subscribe(str(topic_item))
         # ----
         if self.BROCKER_NAME is self.LOCAL_TYPE:
