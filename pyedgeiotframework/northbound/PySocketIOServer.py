@@ -101,46 +101,13 @@ class PySocketIOServer(EdgeService):
 class EdgeServerNamespace(socketio.Namespace):
 
     # @sio.event
-    def on_my_event(self, sid, message):
-        print('EdgeServerNamespace: Received my_event {0} : {1} {2}'.format(self.namespace, sid, message))
-        self.emit('my_response', {'data': message}, room=sid)
-
-    # @sio.event
-    def on_my_broadcast_event(self, sid, message):
-        self.emit('my_response', {'data': message['data']})
-
-    # @sio.event
-    def on_join(self, sid, message):
-        self.enter_room(sid, message['room'])
-        self.emit('my_response', {'data': 'Entered room: ' + message['room']},
-                      room=sid)
-
-    # @sio.event
-    def on_leave(self, sid, message):
-        self.leave_room(sid, message['room'])
-        self.emit('my_response', {'data': 'Left room: ' + message['room']},
-                      room=sid)
-
-    # @sio.event
-    def on_close_room(self, sid, message):
-        self.emit('my_response',
-                      {'data': 'Room ' + message['room'] + ' is closing.'},
-                      room=message['room'])
-        self.close_room(message['room'])
-
-    # @sio.event
-    def on_my_room_event(self, sid, message):
-        self.emit('my_response', {'data': message['data']}, room=message['room'])
-
-    # @sio.event
     def on_disconnect_request(self, sid):
         self.disconnect(sid)
 
     # @sio.event
     def on_connect(self, sid, environ):
         print('EdgeServerNamespace: Client({}) Connected!'.format(sid))
-        self.emit('my_response', {'data': 'Connected', 'count': 0}, room="sid")
-        self.send(data={'data': 'Connected', 'count': 0})
+        # self.send(data={'data': 'Connected', 'count': 0})
 
     # @sio.event
     def on_disconnect(sid):
@@ -149,14 +116,5 @@ class EdgeServerNamespace(socketio.Namespace):
     def on_message(self, sid, message= None):
         print('EdgeServerNamespace: Received message {0} : {1} {2}'.format(self.namespace, sid, message))
         # self.emit(event="message", data=msg, room=sid)
-        self.send(data={'data': message})
+        # self.send(data={'data': message})
 
-    def on_renderer_is_ready_topic(self, sid, message):
-        print('SharelabServerNamespace: Received renderer_is_ready_topic {0} : {1} {2}'.format(self.namespace, sid, message))
-        # self.send(data={'data': message['data']})
-        self.emit('renderer_is_ready_topic', message)
-
-    def on_rendering_media_topic(self, sid, message):
-        print('SharelabServerNamespace: Received rendering_media_topic {0} : {1} {2}'.format(self.namespace, sid, message))
-        # self.send(data={'data': message['data']})
-        self.emit('rendering_media_topic', message)

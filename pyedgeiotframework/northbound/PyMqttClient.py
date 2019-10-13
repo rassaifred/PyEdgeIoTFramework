@@ -61,7 +61,7 @@ class PyMqttClient(EdgeService):
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc):
-        print("Local Mqtt Connected with result code {0} to brocker: {1} at adress: {2}".format(str(rc), self.BROCKER_NAME, self.MQTT_BROCKER_ADRESS))
+        print("Mqtt Connected with result code {0} to brocker: {1} at adress: {2}".format(str(rc), self.BROCKER_NAME, self.MQTT_BROCKER_ADRESS))
         # Subscribing in on_connect() means that if we lose the connection and
         # reconnect then subscriptions will be renewed.
         # client.subscribe("$SYS/#")
