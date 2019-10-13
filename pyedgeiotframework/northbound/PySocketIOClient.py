@@ -17,7 +17,7 @@ class PySocketIOClient(EdgeService):
     SOCKET_IO_CLIENT_CONNECTED_TOPIC = "socket_io_client_connected_topic"
     SOCKET_IO_CLIENT_DISCONNECTED_TOPIC = "socket_io_client_disconnected_topic"
 
-    TOPICS_LIST = ["/test"]
+    TOPICS_LIST = ["/"]
     MIROR_TOPICS_LIST = []
 
     sio = None
@@ -80,7 +80,7 @@ class PySocketIOClient(EdgeService):
         # ----
         pub.sendMessage(self.SOCKET_IO_CLIENT_CONNECTED_TOPIC)
         # ----
-        # self.sio.emit(event="message", namespace="/test", data={"device":"rpi_03"})
+        self.sio.send(data={"device": "rpi_03"})
 
     # @sio.on('disconnect')
     def disconnect_handler(self):
