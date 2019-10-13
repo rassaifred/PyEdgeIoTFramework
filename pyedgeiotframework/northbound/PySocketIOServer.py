@@ -22,7 +22,7 @@ class PySocketIOServer(EdgeService):
     sio = None
     app = None
 
-    registred = True
+    registred = False
 
     def __init__(self):
         # ---
@@ -35,7 +35,7 @@ class PySocketIOServer(EdgeService):
         # ----
         print('server socket io run')
         # ----
-        self.sio = socketio.Server(async_handlers=eventlet, cors_allowed_origins='*')
+        self.sio = socketio.Server(cors_allowed_origins='*', always_connect=True)
         # ----
         self.sio.on('connect', self.connect_handler)
         self.sio.on('disconnect', self.disconnect_handler)
