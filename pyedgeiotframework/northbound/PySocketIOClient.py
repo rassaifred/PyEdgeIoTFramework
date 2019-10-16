@@ -42,7 +42,7 @@ class PySocketIOClient(EdgeService):
         # ---
         # explode_topic_to_namespace(tmp_topic="/device/rpi_03/get_event")
         # ---
-        self.sio = socketio.Client(logger=True)
+        self.sio = socketio.Client(logger=False)
         # ---
         # self.sio.on('connect', self.connect_handler)
         # self.sio.on('disconnect', self.disconnect_handler)
