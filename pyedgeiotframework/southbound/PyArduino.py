@@ -46,12 +46,9 @@ class PyArduino(EdgeService):
             hits += 1
         # -----------------------------------------------
         # ---
-        try:
-            self.serial_port = serial.Serial(self.serialport, self.baud, timeout=1)
-        except :
-            print("Arduino error port")
+        self.serial_port = serial.Serial(self.serialport, self.baud, timeout=1)
         # ---
-        while True:
+        while self.serial_port:
             self.read_serial_device()
             time.sleep(1)
 
