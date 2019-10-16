@@ -1,4 +1,6 @@
 from pyedgeiotframework.core.EdgeService import EdgeService
+import sys
+import os
 
 
 class PyHost(EdgeService):
@@ -24,14 +26,7 @@ class PyHost(EdgeService):
 
     def power_off_host_callback(self, payload=None):
         print("Host power off")
-        import sys
-        if sys.platform == 'win32':
-
-            import ctypes
-            user32 = ctypes.WinDLL('user32')
-            user32.ExitWindowsEx(0x00000008, 0x00000000)
-
+        if os.name == 'nt' or sys.platform == 'win32':
+            os.system("shutdown /s /t 0")
         else:
-
-            import os
             os.system('sudo shutdown now')
