@@ -51,22 +51,19 @@ class PyArduino(EdgeService):
         except :
             print("Arduino error port")
         # ---
-        while self.serial_port:
+        while True:
             self.read_serial_device()
             time.sleep(1)
 
     def read_serial_device(self):
-        try:
-            read_serial = self.serial_port.readline().rstrip()
-            tmp_str = read_serial.decode("utf-8").replace(" ", "")
-            if tmp_str:
-                # ---
-                print("ARDUINO:", tmp_str)
-                # ---
-                self.dispatch_event(
-                    topic=str(tmp_str),
-                    payload=str(tmp_str)
-                )
-                # ---
-        except :
-            print("port error")
+        read_serial = self.serial_port.readline().rstrip()
+        tmp_str = read_serial.decode("utf-8").replace(" ", "")
+        if tmp_str:
+            # ---
+            print("ARDUINO:", tmp_str)
+            # ---
+            self.dispatch_event(
+                topic=str(tmp_str),
+                payload=str(tmp_str)
+            )
+            # ---
