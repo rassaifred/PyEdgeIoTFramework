@@ -10,7 +10,6 @@ from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
 
 
 class PySocketIOClient(EdgeService):
-
     SOCKET_IO_SERVER_ADRESS_PROTOCOL = "http"
 
     if os.getenv("SOCKET_IO_SERVER_ADRESS_PROTOCOL"):
@@ -30,7 +29,6 @@ class PySocketIOClient(EdgeService):
 
     SOCKET_IO_CLIENT_DISCONNECTED_TOPIC = "socket_io_client_disconnected_topic"
 
-
     TOPICS_LIST = ["/"]
     MIROR_TOPICS_LIST = []
 
@@ -49,7 +47,7 @@ class PySocketIOClient(EdgeService):
         # ---
         if len(self.TOPICS_LIST) > 0:
             for topic_item in self.TOPICS_LIST:
-                print("client: 0 socketIO subscribe to topic:{}".format(topic_item))
+                # print("client: 0 socketIO subscribe to topic:{}".format(topic_item))
                 # self.client.subscribe(str(topic_item))
                 self.sio.register_namespace(EdgeClientNamespace(str(topic_item)))
 
@@ -59,8 +57,7 @@ class PySocketIOClient(EdgeService):
         # ---
         if len(self.MIROR_TOPICS_LIST) > 0:
             for mirror_topic_item in self.MIROR_TOPICS_LIST:
-                print("client: 0 socketIO subscribe mirror topic:{}".format(mirror_topic_item))
-                # pub.subscribe(self.on_mirror_message, str(mirror_topic_item))
+                # print("client: 0 socketIO subscribe mirror topic:{}".format(mirror_topic_item))
                 self.subscribe_command(callback=self.on_mirror_message, topic=mirror_topic_item)
 
         # ---
@@ -124,7 +121,7 @@ def explode_topic_to_namespace(tmp_topic: str):
         "event": ""
     }
     # ---
-    result:str = tmp_topic.split("/")
+    result: str = tmp_topic.split("/")
     # ---
     event_tmp = result[len(result) - 1]
     # ---
@@ -142,7 +139,6 @@ def explode_topic_to_namespace(tmp_topic: str):
 class EdgeClientNamespace(socketio.ClientNamespace):
 
     def on_connect(self):
-        # self.sio.emit(event="message", namespace="/test", data=self.SOCKET_IO_CLIENT_CONNECTED_TOPIC)
         print("EdgeClientNamespace on_connect ", self.namespace)
         pass
 
@@ -150,5 +146,5 @@ class EdgeClientNamespace(socketio.ClientNamespace):
         print("EdgeClientNamespace on_disconnect")
         pass
 
-    def on_message(self,msg = None):
+    def on_message(self, msg=None):
         print('EdgeClientNamespace Received message')
