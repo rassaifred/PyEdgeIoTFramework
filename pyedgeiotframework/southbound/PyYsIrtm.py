@@ -53,7 +53,6 @@ class PyYsIrtm(EdgeService):
                     self.serialport = tmp_item.device
                     try:
                         self.serial_port = serial.Serial(self.serialport, self.baud, timeout=1)
-
                         # self.send_command([0x32, 0xcd, 0x81])
                     except:
                         self.serial_port = None
