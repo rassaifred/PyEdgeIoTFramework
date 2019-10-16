@@ -27,7 +27,7 @@ class PyHost(EdgeService):
     def power_off_host_callback(self, payload=None):
         print("Host power off")
         if os.name == 'nt' or sys.platform == 'win32':
-            os.system("set OCARZ_PROJECTOR_PWR_TESTED=1")
+            # os.system("set OCARZ_PROJECTOR_PWR_TESTED=1")
             os.system("shutdown /s /t 0")
         else:
             os.system('sudo shutdown now')
