@@ -58,12 +58,12 @@ class PyArduino(EdgeService):
         # ---
         read_serial = self.serial_port.readline().rstrip()
         # ---
-        print("arduino read serial {}".format(read_serial))
+        # print("arduino read serial {}".format(read_serial))
         # ---
         tmp_str = read_serial.decode("utf-8").replace(" ", "")
         if tmp_str:
             # ---
-            print("ARDUINO:", tmp_str)
+            # print("ARDUINO:", tmp_str)
             # ---
             self.dispatch_event(
                 topic=str(tmp_str),
