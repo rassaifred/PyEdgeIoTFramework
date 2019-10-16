@@ -56,6 +56,9 @@ class PyArduino(EdgeService):
             time.sleep(1)
 
     def read_serial_device(self):
+        # ---
+        print("arduino read serial")
+        # ---
         read_serial = self.serial_port.readline().rstrip()
         tmp_str = read_serial.decode("utf-8").replace(" ", "")
         if tmp_str:
