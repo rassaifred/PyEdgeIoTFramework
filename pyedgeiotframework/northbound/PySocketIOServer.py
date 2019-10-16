@@ -28,17 +28,10 @@ class PySocketIOServer(EdgeService):
         # ---
         EdgeService.__init__(self)
         # ---
-
-    def run(self) -> None:
-        # ---
-        EdgeService.run(self)
-        # ----
-        print('server socket io run')
-        # ----
         self.sio = socketio.Server(cors_allowed_origins='*', always_connect=True)
         # ----
-        self.sio.on('connect', self.connect_handler)
-        self.sio.on('disconnect', self.disconnect_handler)
+        # self.sio.on('connect', self.connect_handler)
+        # self.sio.on('disconnect', self.disconnect_handler)
 
         # ---
         if len(self.TOPICS_LIST) > 0:
@@ -48,6 +41,12 @@ class PySocketIOServer(EdgeService):
                 self.sio.register_namespace(EdgeServerNamespace(str(topic_item)))
                 pass
         # ---
+
+    def run(self) -> None:
+        # ---
+        EdgeService.run(self)
+        # ----
+        print('server socket io run')
         # ----
 
         """self.sio.on('connect', self.connect_handler)
@@ -80,7 +79,7 @@ class PySocketIOServer(EdgeService):
             pass
         # ----
 
-    def disconnect_handler(self, sid):
+    """def disconnect_handler(self, sid):
         print('server: Client({}) disconnected!'.format(sid))
 
     def connect_handler(self, sid, environ):
@@ -95,7 +94,7 @@ class PySocketIOServer(EdgeService):
                     # self.client.subscribe(str(topic_item))
                     self.sio.register_namespace(EdgeServerNamespace(str(topic_item)))
                     pass
-            # ---
+            # ---"""
 
 
 class EdgeServerNamespace(socketio.Namespace):
