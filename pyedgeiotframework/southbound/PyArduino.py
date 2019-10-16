@@ -31,12 +31,8 @@ class PyArduino(EdgeService):
         tmp_comp = comports(include_links=None)
         iterator = sorted(tmp_comp)
         for n, (port, desc, hwid) in enumerate(iterator, 1):
-            # print("{:20}\n".format(port))
-            """print("{:20}".format(port))
-            print(" desc: {}".format(desc))
-            print(" hwid: {}".format(hwid))"""
             # ---
-            # print('# ----> {}'.format(tmp_comp[hits].hwid))
+            print("ARDUINO: {:20} desc: {} hwid: {}".format(port, desc, hwid))
             # ---
             if "067B" in str(tmp_comp[hits].hwid) and "2303" in str(tmp_comp[hits].hwid):
                 print("-----> arduino add port {}".format(port))

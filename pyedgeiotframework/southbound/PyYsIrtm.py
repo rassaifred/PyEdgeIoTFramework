@@ -40,12 +40,7 @@ class PyYsIrtm(EdgeService):
         tmp_comp = comports(include_links=None)
         iterator = sorted(tmp_comp)
         for n, (port, desc, hwid) in enumerate(iterator, 1):
-            # print("{:20}\n".format(port))
-            """print("{:20}".format(port))
-            print(" desc: {}".format(desc))
-            print(" hwid: {}".format(hwid))"""
-            # ---
-            # print('# ----> {}'.format(tmp_comp[hits].hwid))
+            print("IR_MODULE: {:20} desc: {} hwid: {}".format(port, desc, hwid))
             # ---
             if "1A86" in str(tmp_comp[hits].hwid) and "7523" in str(tmp_comp[hits].hwid):
                 self.serialport = port
