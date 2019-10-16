@@ -53,16 +53,17 @@ class PyYsIrtm(EdgeService):
                     self.serialport = tmp_item.device
                     try:
                         self.serial_port = serial.Serial(self.serialport, self.baud, timeout=1)
-                        self.subscribe_command(
-                            callback=self.send_command,
-                            topic=self.SEND_IR_TOPIC
-                        )
+
                         # self.send_command([0x32, 0xcd, 0x81])
                     except:
                         self.serial_port = None
         # -----------------------------------------------
         # ----
         while self.serial_port:
+            self.subscribe_command(
+                callback=self.send_command,
+                topic=self.SEND_IR_TOPIC
+            )
             self.read_from_port()
             pass
 
