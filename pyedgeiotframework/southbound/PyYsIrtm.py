@@ -57,12 +57,12 @@ class PyYsIrtm(EdgeService):
                     except:
                         self.serial_port = None
         # -----------------------------------------------
+        self.subscribe_command(
+            callback=self.send_command,
+            topic=self.SEND_IR_TOPIC
+        )
         # ----
         while self.serial_port:
-            self.subscribe_command(
-                callback=self.send_command,
-                topic=self.SEND_IR_TOPIC
-            )
             self.read_from_port()
             pass
 
@@ -85,4 +85,7 @@ class PyYsIrtm(EdgeService):
             if len(list(data)) > 0 and len(list(data)) >= 3:
                 print(list(data))
                 values = bytearray([* self.baselist, *data])
-                self.serial_port.write(values)
+                try:
+                    self.serial_port.write(values)
+                except :
+                    print("ir non envoyer")
