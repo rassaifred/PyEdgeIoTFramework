@@ -76,7 +76,7 @@ class PySocketIOClient(EdgeService):
 
                     # ---
                 except:
-                    print("client: ConnectionError")
+                    # print("client: ConnectionError")
                     time.sleep(3)
             pass
         # ---
