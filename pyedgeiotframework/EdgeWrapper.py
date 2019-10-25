@@ -4,6 +4,7 @@ ToDo: add DislayRenderer select base renderer by platform and media type
 ToDo: OmXRenderer only exist
 ToDo: add DesktopRenderer
 ToDo: add HtmlRenderer
+ToDo: manage all exception and make a loop to retry action failed
 
 Description:
 

@@ -10,7 +10,8 @@ def power_off():
     try:
         os.environ['DBUS_SESSION_BUS_ADDRESS'] = "unix:path=/host/run/dbus/system_bus_socket"
         print("--> dbus adress: ", os.environ['DBUS_SESSION_BUS_ADDRESS'])
-    except:
+    except Exception as e:
+        print("PyPower error: {}".format(e))
         print("impossible de charger DBUS_SESSION_BUS_ADDRESS")
     # ---------
     cmd_str = 'dbus-send --system --print-reply --dest=org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager.PowerOff'
@@ -19,7 +20,8 @@ def power_off():
     try:
         dbus_run = os.popen(cmd_str).read().rstrip()
         print("-->", dbus_run)
-    except:
+    except Exception as e:
+        print("PyPower error: {}".format(e))
         print("impossible d'executer dbus-send poweroff")
 
 
@@ -28,7 +30,8 @@ def reboot():
     try:
         os.environ['DBUS_SESSION_BUS_ADDRESS'] = "unix:path=/host/run/dbus/system_bus_socket"
         print("--> dbus adress: ", os.environ['DBUS_SESSION_BUS_ADDRESS'])
-    except:
+    except Exception as e:
+        print("PyPower error: {}".format(e))
         print("impossible de charger DBUS_SESSION_BUS_ADDRESS")
     # ---------
     cmd_str = 'dbus-send --system --print-reply --dest=org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager.Reboot'
@@ -37,7 +40,8 @@ def reboot():
     try:
         dbus_run = os.popen(cmd_str).read().rstrip()
         print("-->", dbus_run)
-    except:
+    except Exception as e:
+        print("PyPower error: {}".format(e))
         print("impossible d'executer dbus-send reboot")
 
 

@@ -105,3 +105,4 @@ Commands:
 ## ToDo
 - ToDo: Add PySse service (like mqtt)
 - ToDo: Add PyMplayer service (like omxplayer)
+- ToDo: manage all exception and make a loop to retry action failed

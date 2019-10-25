@@ -129,11 +129,14 @@ class PyOmxplayer(EdgeService):
         data = None
         try:
             data = json.loads(payload.decode("utf-8"))
-        except:
+        except Exception as e:
+            # ---
+            print("{} error: {}".format(self.__class__.__name__, e))
+            # ---
             try:
                 data = json.loads(payload)
-            except:
-                print("data error")
+            except Exception as e:
+                print("{} error: {}".format(self.__class__.__name__, e))
         # ----
         # print("data:", data)
         # ----

@@ -22,6 +22,7 @@ RADAR_DISTANCE_TOPIC = "radar_distance_topic"
 sigGpio = 17
 sigInterval = .2
 maxTime = 0.04
+distance = -1
 
 
 def read_distance(pin):
@@ -61,14 +62,12 @@ def read_distance(pin):
     return distance
 
 
-distance = -1
-
-
 class PyPing(EdgeService):
 
     def __init__(self):
         EdgeService.__init__(self)
         # ----
+        self.distance = -1
         # ----
 
     def run(self):
@@ -78,8 +77,8 @@ class PyPing(EdgeService):
         while True:
             try:
                 self.distance = read_distance(sigGpio)
-            except:
-                print("error to ping")
+            except Exception as e:
+                print("{} error: {}".format(self.__class__.__name__, e))
             # print("Distance to object is ", distance, " cm or ", distance * .3937, " inches")
             # ----
             self.dispatch_event(

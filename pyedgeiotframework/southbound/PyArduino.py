@@ -4,7 +4,6 @@ from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
 
 
 class PyArduino(EdgeService):
-
     ARDUINO_UNO_REV3_PORT = '/dev/ttyUSB0'
     ARDUINO_NANO_REV3_PORT = '/dev/cu.wchusbserial14230'
 
@@ -44,15 +43,22 @@ class PyArduino(EdgeService):
                 if tmp_item.vid == int(target_vid, 16) and tmp_item.pid == int(target_pid, 16):
                     print("-----> arduino add port {}".format(tmp_item))
                     self.serialport = tmp_item.device
-                    try :
+                    try:
                         self.serial_port = serial.Serial(self.serialport, self.baud, timeout=1)
-                    except :
+                    except Exception as e:
+                        print("{} error: {}".format(self.__class__.__name__, e))
                         self.serial_port = None
         # -----------------------------------------------
-        # ---
-        while self.serial_port:
+        while True:
+            # ---
+            if self.serial_port:
                 self.read_serial_device()
                 time.sleep(1)
+            else:
+                # ---
+                # ToDo: make plug&play loop scan if new arduino plugged
+                # ---
+                pass
 
     def read_serial_device(self):
         # ---

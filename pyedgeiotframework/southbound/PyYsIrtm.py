@@ -54,7 +54,8 @@ class PyYsIrtm(EdgeService):
                     try:
                         self.serial_port = serial.Serial(self.serialport, self.baud, timeout=1)
                         # self.send_command([0x32, 0xcd, 0x81])
-                    except:
+                    except Exception as e:
+                        print("{} error: {}".format(self.__class__.__name__, e))
                         self.serial_port = None
         # -----------------------------------------------
         self.subscribe_command(
@@ -77,6 +78,9 @@ class PyYsIrtm(EdgeService):
                     print(list(data))
 
     def send_command(self, payload=None):
+        # ---
+        # ToDo: add job mecanisme to be sure sending data
+        # ---
         print("send_ir_command")
         if payload:
             data = binascii.unhexlify(payload)
@@ -87,5 +91,6 @@ class PyYsIrtm(EdgeService):
                 values = bytearray([* self.baselist, *data])
                 try:
                     self.serial_port.write(values)
-                except :
+                except Exception as e:
+                    print("{} error: {}".format(self.__class__.__name__, e))
                     print("ir non envoyer")

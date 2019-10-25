@@ -5,6 +5,8 @@ ToDo: add subscribe_mqtt_topic --> mirror to --> PyPubSub
 """
 
 import os
+import time
+
 import paho.mqtt.client as mqtt
 from pubsub import pub
 from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
@@ -36,6 +38,8 @@ class PyMqttClient(EdgeService):
         # ----
         self.client = mqtt.Client()
         # ----
+        self.client_connected = False
+        # ----
 
     def run(self):
         # ----
@@ -49,15 +53,16 @@ class PyMqttClient(EdgeService):
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         # ----
-        try:
-            self.client.connect(self.MQTT_BROCKER_ADRESS, self.MQTT_BROCKER_PORT, self.MQTT_KEEPALIVE)
-        except ConnectionRefusedError:
-            print("ConnectionRefusedError")
-        # ----
-        self.client.loop_forever()
-        # ----
         while True:
-            pass
+            if not self.client_connected:
+                # ----
+                try:
+                    self.client.connect(self.MQTT_BROCKER_ADRESS, self.MQTT_BROCKER_PORT, self.MQTT_KEEPALIVE)
+                    self.client.loop_forever()
+                except Exception as e:
+                    print("{} error: {}".format(self.__class__.__name__, e))
+                # ----
+            time.pause(5)
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc):

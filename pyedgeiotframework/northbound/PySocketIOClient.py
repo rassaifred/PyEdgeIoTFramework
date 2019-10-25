@@ -5,7 +5,6 @@ ToDo:
 import os
 import time
 import socketio
-from pubsub import pub
 from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
 
 
@@ -75,10 +74,9 @@ class PySocketIOClient(EdgeService):
                     )
 
                     # ---
-                except:
-                    # print("client: ConnectionError")
-                    time.sleep(3)
-            pass
+                except Exception as e:
+                    print("{} error: {}".format(self.__class__.__name__, e))
+            time.sleep(5)
         # ---
 
     # @sio.on('connect')
