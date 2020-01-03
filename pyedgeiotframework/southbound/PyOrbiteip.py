@@ -76,6 +76,7 @@ class PyOrbiteip(EdgeService):
     def on_get(self, req, resp):
         # ---
         curr_time = datetime.datetime.now()  # ('Y-m-d H:i:s', time());
+        # ---
         st = curr_time.strftime("%Y-%m-%d %H:%M:%S")
         # ---
         cmd = req.get_param("cmd")
@@ -83,12 +84,9 @@ class PyOrbiteip(EdgeService):
         relay = req.get_param("relay")
         sd = req.get_param("sd")
         md5 = req.get_param("md5")
-        # ---
         device_id = req.get_param("id")
         # ---
         print("cmd:", cmd, " --> ", req)
-        # ---
-        resp.status = falcon.HTTP_200  # This is the default status
         # ---
         response_str = ''
         # ---
@@ -134,9 +132,9 @@ class PyOrbiteip(EdgeService):
                 self.first_run = False
         elif cmd == 'CB':
             pass
-        else:
-            response_str += 'CK={}'.format(st)
-
-        # print("response --> ", response_str)
         # ---
-        resp.body = ('<html><body><ORBIT>%s</ORBIT></body></html>' % response_str)
+        response_body = '<html><body><ORBIT>%s</ORBIT></body></html>' % response_str
+        print("response_body --> ", response_body)
+        # ---
+        resp.status = falcon.HTTP_200  # This is the default status
+        resp.body = response_body
