@@ -34,11 +34,11 @@ class PyMqttClient(EdgeService):
 
     def __init__(self):
         # ----
-        super().__init__()
-        # ----
         self.client = mqtt.Client()
         # ----
         self.client_connected = False
+        # ----
+        super().__init__()
         # ----
 
     def run(self):
@@ -66,8 +66,8 @@ class PyMqttClient(EdgeService):
                 # ----
                 try:
                     self.client.connect(self.MQTT_BROCKER_ADRESS, self.MQTT_BROCKER_PORT, self.MQTT_KEEPALIVE)
-                    # self.client.loop_forever()
-                    self.client.loop_start
+                    self.client.loop_forever()
+                    # self.client.loop_start()
                 except Exception as e:
                     print("{} error: {}".format(self.__class__.__name__, e))
                 # ----
@@ -100,7 +100,7 @@ class PyMqttClient(EdgeService):
     def on_message(self, client, userdata, msg):
         # ----
         # print('Local Mqtt receive topic "%s": %s brocker: %s at adress: %s' % (msg.topic, str(msg.payload), self.BROCKER_NAME,self.MQTT_BROCKER_ADRESS))
-        pub.sendMessage(topicName=msg.topic, payload=msg.payload)
+        pub.sendMessage(topicName=str(msg.topic), payload=str(msg.payload))
 
     def on_mirror_message(self, topic=None, payload=None, topicArg=None):
         # print('local mqtt mirror topic "%s"' % topic)
@@ -114,4 +114,5 @@ class PyMqttClient(EdgeService):
         pass
 
     def on_log(self, client, userdata, level, buf):
+        # print(userdata, level, buf)
         pass

@@ -40,9 +40,20 @@ class EdgeWrapper:
     SENTRY_URL = None
     DEVICE_ID = None
 
+    def __new__(cls, *args, **kwargs):
+        super().__new__(cls)
+        # ---
+        print(cls.__name__ + ":new")
+        # create our object and return it
+        obj = super().__new__(cls)
+        obj.__init__()
+        return obj
+
     def __int__(self):
         # ----
         print(self.__class__.__name__ + ":init")
+
+    def startup_wrapper(self):
         # ----
         if os.getenv('SENTRY_URL'):
             self.SENTRY_URL = os.getenv('SENTRY_URL')
@@ -54,8 +65,6 @@ class EdgeWrapper:
         # ----
         # ToDo: add default services
         # ----
-
-    def startup_wrapper(self):
         # ----
         print(self.__class__.__name__ + ":startup_wrapper")
         # ----

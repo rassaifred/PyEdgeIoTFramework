@@ -1,4 +1,5 @@
 """
+
 ToDo: make static ip e.g: 192.168.1.255 next time use local.orbitip.server with security param in Global Env Var
 ToDo: make endpoint to control Orbite IP devices
 ToDo: make bridge Orbite IP <=> PyPubSub
@@ -58,15 +59,18 @@ class PyOrbiteip(EdgeService):
     app = None
     # ----
     first_run = True
+    # ----
+    init_state_contact1 = True
+    # ----
 
     def __int__(self):
         # ----
-        EdgeService.__init__(self)
+        super().__init__()
         # ----
 
-    def run(self) -> None:
+    def run(self):
         # ----
-        EdgeService.run(self)
+        super().run()
         # ----
         # Resources are represented by long-lived class instances
         # things will handle all requests to the '/things' URL path
@@ -74,6 +78,8 @@ class PyOrbiteip(EdgeService):
             self.app.add_route('/orbitip.php', self)
 
     def on_get(self, req, resp):
+        # ---
+        # print("\n*-::-*-:GET start:-*-::-*", datetime.datetime.utcnow())
         # ---
         curr_time = datetime.datetime.now()  # ('Y-m-d H:i:s', time());
         # ---
@@ -86,20 +92,22 @@ class PyOrbiteip(EdgeService):
         md5 = req.get_param("md5")
         device_id = req.get_param("id")
         # ---
-        print("cmd:", cmd, " --> ", req)
-        # ---
         response_str = ''
         # ---
         if cmd == 'PU':
             response_str += 'CK={}\n'.format(st)
+            response_str += 'HB=10\t'
         elif cmd == 'CO':
             # ---
             uid = req.get_param("uid")
             # ---
             # print("uid --> ", uid)
             # response_str += 'BEEP=1\t'
-            # response_str += 'RCR=3\t'
-            response_str += 'PBKT=50000000\t'
+            response_str += 'RCR=3\t'
+            response_str += 'PBKT=10\t'
+            # ---
+            # print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+            # print("orbit read start ---> ", datetime.datetime.utcnow())
             # ---
             self.dispatch_event(
                 topic=self.READ_CARD_TAG_TOPIC,
@@ -109,6 +117,9 @@ class PyOrbiteip(EdgeService):
                 }
             )
             # ---
+            # print("orbit read end ---> ", datetime.datetime.utcnow())
+            # print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+            # ---
         elif cmd == 'HB':
             # verif
             # response_str += 'CK={}'.format(st)
@@ -117,13 +128,22 @@ class PyOrbiteip(EdgeService):
             # is sent when a level change is detected either on digital Input 1
             sw_state = req.get_param("contact1")
             # ---
-            self.dispatch_event(
-                topic=self.SWITCH_CHANGE_TOPIC,
-                payload={
-                    "port": device_id,
-                    "state": sw_state
-                }
-            )
+            # print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+            # print("orbit sw start ---> ", datetime.datetime.utcnow())
+            # ---
+            if bool(int(sw_state)) is self.init_state_contact1:
+                # ---
+                self.dispatch_event(
+                    topic=self.SWITCH_CHANGE_TOPIC,
+                    payload={
+                        "port": device_id,
+                        "state": sw_state
+                    }
+                )
+                # ---
+            # ---
+            # print("orbit sw end ---> ", datetime.datetime.utcnow())
+            # print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
             # ---
         elif cmd == 'PG':
             # ---
@@ -134,7 +154,10 @@ class PyOrbiteip(EdgeService):
             pass
         # ---
         response_body = '<html><body><ORBIT>%s</ORBIT></body></html>' % response_str
-        print("response_body --> ", response_body)
+        # ---
+        # print("cmd:", cmd, req, "resp:", response_body)
         # ---
         resp.status = falcon.HTTP_200  # This is the default status
         resp.body = response_body
+        # ---
+        # print("*-::-*-:GET end :-*-::-*{}\n".format(datetime.datetime.utcnow()))
