@@ -8,14 +8,6 @@ from pubsub import pub
 
 class EdgeService(Thread):
 
-    def __new__(cls, *args, **kwargs):
-        super().__new__(cls)
-        # ---
-        print(cls.__name__ + ":new")
-        # create our object and return it
-        obj = super().__new__(cls)
-        return obj
-
     def __init__(self):
         print(self.__class__.__name__ + ":init")
         # ----

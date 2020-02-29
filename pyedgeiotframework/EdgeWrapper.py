@@ -40,16 +40,7 @@ class EdgeWrapper:
     SENTRY_URL = None
     DEVICE_ID = None
 
-    def __new__(cls, *args, **kwargs):
-        super().__new__(cls)
-        # ---
-        print(cls.__name__ + ":new")
-        # create our object and return it
-        obj = super().__new__(cls)
-        obj.__init__()
-        return obj
-
-    def __int__(self):
+    def __init__(self):
         # ----
         print(self.__class__.__name__ + ":init")
 

@@ -1,8 +1,8 @@
 """
 ToDo: ok - add scan ip's
-ToDo: verify if camfi-adress
-ToDo: get camfi infos
-ToDO: get camera config
+ToDo: ok - verify if camfi-adress
+ToDo: ok - get camfi infos
+ToDO: ok - get camera config
 ToDo: add socket client camfi
 ToDO: add socket event handler
 """
@@ -17,6 +17,31 @@ import requests
 
 
 from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
+from PyEdgeIoTFramework.pyedgeiotframework.southbound.PyDSLR import PyDSLR
+
+
+class PyCamFiMatrix(EdgeService):
+
+    def __init__(self):
+        # ----
+        super().__init__()
+        # ----
+        self.cafmi_list = []
+        self.camfi_tool = CamFiTool()
+        # ----
+
+    def run(self) -> None:
+        # ----
+        super().run()
+        # ----
+        self.cafmi_list = self.camfi_tool.scan_camfi()
+        # ----
+        # print(cafmi_list)
+        # ----
+        for c_ip in self.cafmi_list:
+            camfi = PyCamFi()
+            camfi.ip_adress = c_ip
+            camfi.start()
 
 
 class PyCamFi(EdgeService):
@@ -30,24 +55,39 @@ class PyCamFi(EdgeService):
     mac = "-"
     network_mode = "-"
 
-    def __int__(self):
-        """
-
-        :type camfi_ip: camfi ip adress
-        """
+    def __init__(self):
         # ----
-        super().__init__(self)
+        super().__init__()
+        # ----
+        self.camera = PyDSLR()
         # ----
 
     def run(self):
         # ----
         super().run()
         # ----
-        print("camfi with ip adress: {} infos: {}".format(self.ip_adress, self.get_info()))
+        print("camfi added with ip adress: {} infos: {}".format(self.ip_adress, self.get_info()))
+        # ----
+        # get camera config
+        # ----
+        data = self.get_config()
+        if data:
+            # x.main.children.status.children.cameramodel.value
+            self.camera.cameramodel = data["main"]["children"]["status"]["children"]["cameramodel"]["value"]
+            self.camera.deviceversion = data["main"]["children"]["status"]["children"]["deviceversion"]["value"]
+            self.camera.eosserialnumber = data["main"]["children"]["status"]["children"]["eosserialnumber"]["value"]
+            self.camera.serialnumber = data["main"]["children"]["status"]["children"]["serialnumber"]["value"]
+        # ----
+
 
     def get_info(self):
-        get_infi_url = "{}{}{}".format(REST_API_CAMFI_PROTOCOL, self.ip_adress, REST_API_CAMFI_GET_INFO)
-        r = requests.get(get_infi_url)
+        get_url = "{}{}{}".format(REST_API_CAMFI_PROTOCOL, self.ip_adress, REST_API_CAMFI_GET_INFO)
+        r = requests.get(get_url)
+        return r.json()
+
+    def get_config(self):
+        get_url = "{}{}{}".format(REST_API_CAMFI_PROTOCOL, self.ip_adress, REST_API_CAMFI_GET_CONFIG)
+        r = requests.get(get_url)
         return r.json()
 
 
@@ -62,12 +102,7 @@ class CamFiTool:
 
 
 def pinger(job_q, results_q):
-    """
-    Do Ping
-    :param job_q:
-    :param results_q:
-    :return:
-    """
+
     DEVNULL = open(os.devnull, 'w')
     while True:
 
@@ -85,7 +120,7 @@ def pinger(job_q, results_q):
             pass
 
 
-def map_network(pool_size=255):
+def map_network(pool_size=4): # (pool_size=255):
     """
     Maps the network
     :param pool_size: amount of parallel ping processes
@@ -107,7 +142,7 @@ def map_network(pool_size=255):
         p.start()
 
     # cue hte ping processes
-    for i in range(1, 256):
+    for i in range(66, 70): # range(1, 256):
         jobs.put(base_ip + '{0}'.format(i))
 
     for p in pool:
@@ -238,18 +273,17 @@ REST_API_CAMFI_POST_TETHER_STOP = "/tether/stop"
 Il listera les images sur la carte SD.
 
 ### Params ::
-$startEn commençant par les premières photos, type de données entier
+$start: En commençant par les premières photos, type de données entier
 $count: Le nombre de photos à lire. Type de données Entier.
 
 Si l'appel aboutit, un tableau au format suivant est renvoyé:
-[Storage001 / DCIM / xxxx1.jpg,
-Storage001 / DCIM / xxxx2.jpg
-...
-]
+[Storage001 / DCIM / xxxx1.jpg, Storage001 / DCIM / xxxx2.jpg ... ]
 
 Il est à noter que le nombre de demandes n'est pas nécessairement le même que le nombre de retours. Le nombre de feuilles retournées peut être inférieur au nombre de feuilles demandé.
-Code d'état: si l'exécution réussit, le code d'état http sera 200 OK
-Sinon, il renverra 500.
+
+Code d'état: 
+    si l'exécution réussit, le code d'état http sera 200 OK
+    Sinon, il renverra 500.
 
 Python use: REST_API_CAMFI_GET_PHOTOS_LIST.format(start,count)
 """
