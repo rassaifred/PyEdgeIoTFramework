@@ -6,4 +6,6 @@ Pypubsub>=4.0.3
 pyserial>=3.4
 python-socketio[client]
 eventlet
-pycur
+pycurl
+ping3
+python-socketio[asyncio_client]
