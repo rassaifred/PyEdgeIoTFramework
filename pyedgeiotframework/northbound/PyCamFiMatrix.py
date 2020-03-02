@@ -1,10 +1,16 @@
+"""
+ToDo: ok - verify if camfi-adress
+ToDo: extract scan ip methodes to PyNetworkScan
+ToDo: add Dispatch Camera Added Event to trigger Order send form front
+ToDo: add camera order
+ToDo: add loading file_added
+ToDo: add Dispatch photo downloaded event
+"""
+
+import json
 import os
 import multiprocessing
 import subprocess
-import socket
-import pycurl
-from io import BytesIO
-
 
 from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
 from PyEdgeIoTFramework.pyedgeiotframework.southbound.PyCamFi import PyCamFi
@@ -16,6 +22,13 @@ class PyCamFiMatrix(EdgeService):
         # ----
         super().__init__()
         # ----
+        self.matrix_len = 1
+        self.matrix_root_path = ""
+        self.matrix_sequences_date = ""
+        self.matrix_sequences_iteration = 0
+        # ----
+        self.matrix_base_ip = "192" + '.' + "168" + '.9.'
+        # ----
         self.cafmi_list = []
         # ----
 
@@ -23,15 +36,84 @@ class PyCamFiMatrix(EdgeService):
         # ----
         super().run()
         # ----
+        self.subscribe_command(
+            callback=self.camera_added_callback,
+            topic=PyCamFi.CAMFI_CAMERA_ADDED_TOPIC
+        )
+
+        self.subscribe_command(
+            callback=self.camera_removed_callback,
+            topic=PyCamFi.CAMFI_CAMERA_REMOVED_TOPIC
+        )
+
+        self.subscribe_command(
+            callback=self.file_added_callback,
+            topic=PyCamFi.CAMFI_FILE_ADDED_TOPIC
+        )
+        # ----
         self.cafmi_list = self.map_network()
         # ----
         # print(cafmi_list)
         # ----
+        itt = 1
+        # ----
         for c_ip in self.cafmi_list:
-            #for x in range(0, 29):
+            # ---
+            # for x in range(0, 29):
+            # ---
             camfi = PyCamFi()
+            camfi.camera.order = itt
             camfi.ip_adress = c_ip
             camfi.start()
+            # ---
+            itt += 1
+            # ---
+
+    def camera_added_callback(self, payload=None):
+        pass
+
+    def camera_removed_callback(self, payload=None):
+        pass
+
+    def file_added_callback(self, payload=None):
+        # ----
+        tmp_dct = json.loads(payload)
+        # ----
+        gateway = tmp_dct["gateway"]
+        file_added = tmp_dct["file_added"]
+        camera_order = tmp_dct["camera_order"]
+        # ----
+        response = PyCamFi.get_photo_by_path(None, tmp_ip=gateway, path=file_added)
+        # ----
+        if response.status_code == 200:
+            # ----
+            file_save_url = "{}/{}/{}_{}.JPG".format(
+                self.matrix_root_path,
+                self.matrix_sequences_date,
+                camera_order,
+                self.matrix_sequences_iteration
+            )
+            # ----
+            pass
+            with open(file_save_url, 'wb') as f:
+                f.write(response.content)
+                # ---
+                # Dispatch photo downloaded event
+                # ---
+
+    @staticmethod
+    def validate_camfi_ip(tmp_ip):
+        # verify ip
+        data = json.dumps(PyCamFi.get_camfi_info(None, tmp_ip=tmp_ip))
+        tmp_dect = json.loads(data)
+        if tmp_dect["version"]:
+            return True
+        else:
+            return False
+
+    # ----------------------------------------------------
+    #                   SCAN IPs
+    # ----------------------------------------------------
 
     def pinger(self, job_q, results_q):
         DEVNULL = open(os.devnull, 'w')
@@ -45,7 +127,7 @@ class PyCamFiMatrix(EdgeService):
             except:
                 pass
 
-    def map_network(self, pool_size=255):  # (pool_size=255):
+    def map_network(self, pool_size=4):  # (pool_size=255):
         """
         Maps the network
         :param pool_size: amount of parallel ping processes
@@ -55,7 +137,7 @@ class PyCamFiMatrix(EdgeService):
         ip_list = list()
 
         # compose a base like 192.168.1.xxx
-        base_ip = "192" + '.' + "168" + '.9.'
+        # base_ip = "192" + '.' + "168" + '.9.'
 
         # prepare the jobs queue
         jobs = multiprocessing.Queue()
@@ -67,8 +149,8 @@ class PyCamFiMatrix(EdgeService):
             p.start()
 
         # cue hte ping processes
-        for i in range(1, 256):  # range(1, 256):
-            jobs.put(base_ip + '{0}'.format(i))
+        for i in range(66, 69):  # range(1, 256):
+            jobs.put(self.matrix_base_ip + '{0}'.format(i))
 
         for p in pool:
             jobs.put(None)
@@ -79,52 +161,7 @@ class PyCamFiMatrix(EdgeService):
         # collect he results
         while not results.empty():
             ip = results.get()
-            # ip_list.append(ip)
-            # ----
-            # creates a new socket using the given address family.
-            socket_obj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-            # setting up the default timeout in seconds for new socket object
-            socket.setdefaulttimeout(.3)
-
-            # returns 0 if connection succeeds else raises error
-            result = socket_obj.connect_ex((ip, PyCamFi.SOCKET_CAMFI_PORT))  # address and port in the tuple format
-
-            # print(ip, "-", result)
-
-            # closes te object
-            socket_obj.close()
-
-            if result == 0:
-                #
-                url_str = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, ip, PyCamFi.REST_API_CAMFI_GET_INFO)
-                # print(url_str)
-
-                #
-                b_obj = BytesIO()
-                crl = pycurl.Curl()
-
-                # Set URL value
-                crl.setopt(crl.URL, url_str)
-
-                # Write bytes that are utf-8 encoded
-                crl.setopt(crl.WRITEDATA, b_obj)
-
-                # Perform a file transfer
-                crl.perform()
-
-                # End curl session
-                crl.close()
-
-                # Get the content stored in the BytesIO object (in byte characters)
-                get_body = b_obj.getvalue()
-
-                # Decode the bytes stored in get_body to HTML and print the result
-                # print('Output of GET request:\n%s' % get_body.decode('utf8'))
-
-                #
-                if get_body:
-                    #
-                    ip_list.append(ip)
-
-        return ip_list
+            # verify ip
+            if self.validate_camfi_ip(ip):
+                ip_list.append(ip)
+                return ip_list

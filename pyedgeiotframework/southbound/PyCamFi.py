@@ -1,13 +1,15 @@
 """
-ToDo: verify if camfi-adress
 ToDo: ok - get camfi infos
 ToDO: ok - get camera config
 ToDo: ok - add socket client camfi on PyCamFi
 ToDO: ok - add socket event handler on PyCamFi
 ToDo: ok - add events listener -> subscribe to camfi events topics
+ToDo: add losing camfi scenario
+ToDo: add eosserialnuber to copyright automatic form REST API
 """
 
 import requests
+import urllib.parse
 import json
 from socketIO_client import SocketIO, LoggingNamespace
 
@@ -38,8 +40,6 @@ class PyCamFi(EdgeService):
         # ----
         super().run()
         # ----
-        print("camfi added with ip adress: {} infos: {}".format(self.ip_adress, self.get_camfi_info()))
-        # ----
         # get camera config
         # ----
         data = self.get_camera_config()
@@ -51,6 +51,26 @@ class PyCamFi(EdgeService):
                 self.camera.deviceversion = data["main"]["children"]["status"]["children"]["deviceversion"]["value"]
                 self.camera.eosserialnumber = data["main"]["children"]["status"]["children"]["eosserialnumber"]["value"]
                 self.camera.serialnumber = data["main"]["children"]["status"]["children"]["serialnumber"]["value"]
+            except:
+                pass
+        # ----
+        # get camfi info
+        # ----
+        info_data = self.get_camfi_info()
+        # ----
+        if info_data:
+            try:
+                self.version = info_data["version"]
+                self.serial = info_data["serial"]
+                self.used = float(info_data["used"])
+                # ---
+                data = json.dumps(
+                    dict(camera_id=self.camera.eosserialnumber, gateway=self.ip_adress, camera_order=self.camera.order)
+                )
+                # ---
+                print('camera_add', data)
+                # ---
+                self.dispatch_event(topic=str(PyCamFi.CAMFI_CAMERA_ADDED_TOPIC), payload=data)
             except:
                 pass
         # ----
@@ -73,30 +93,48 @@ class PyCamFi(EdgeService):
         # start tethring
         # ----
         self.start_tethring()
+        # ----
 
     # ----------------------------------------------------
     #                   REST API
     # ----------------------------------------------------
 
-    def get_camfi_info(self):
-        get_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, self.ip_adress, PyCamFi.REST_API_CAMFI_GET_INFO)
+    def get_camfi_info(self, tmp_ip=None):
+        if not tmp_ip:
+            tmp_ip = self.ip_adress
+        get_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_GET_INFO)
         r = requests.get(get_url)
         return r.json()
 
-    def get_camera_config(self):
-        get_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, self.ip_adress, PyCamFi.REST_API_CAMFI_GET_CONFIG)
+    def get_camera_config(self, tmp_ip=None):
+        if not tmp_ip:
+            tmp_ip = self.ip_adress
+        get_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_GET_CONFIG)
         r = requests.get(get_url)
         return r.json()
 
-    def start_tethring(self):
-        post_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, self.ip_adress, PyCamFi.REST_API_CAMFI_GET_TAKEPIC)
+    def start_tethring(self, tmp_ip=None):
+        if not tmp_ip:
+            tmp_ip = self.ip_adress
+        post_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_GET_TAKEPIC)
         r = requests.post(post_url)
         return r.json()
 
-    def stop_tethring(self):
-        post_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, self.ip_adress, PyCamFi.REST_API_CAMFI_POST_TETHER_STOP)
+    def stop_tethring(self, tmp_ip=None):
+        if not tmp_ip:
+            tmp_ip = self.ip_adress
+        post_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_POST_TETHER_STOP)
         r = requests.post(post_url)
         return r.json()
+
+    def get_photo_by_path(self, tmp_ip=None, path=None):
+        if not tmp_ip:
+            tmp_ip = self.ip_adress
+        if path:
+            get_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_GET_RAW_FILE,
+                                      urllib.parse.quote(path))
+            r = requests.get(get_url)
+            return r
 
     # ----------------------------------------------------
     #                   SOCKET API
@@ -112,34 +150,49 @@ class PyCamFi(EdgeService):
         print('reconnect')
 
     def on_camera_remove(self):
+        # ---
         self.start_tethring()
         # ---
-        data = json.dumps({"camera_id": self.camera.eosserialnumber, "gateway": self.ip_adress})
+        data = json.dumps(
+            dict(camera_id=self.camera.eosserialnumber, gateway=self.ip_adress, camera_order=self.camera.order)
+        )
         print('camera_remove', data)
         # ---
         self.dispatch_event(topic=str(PyCamFi.CAMFI_CAMERA_REMOVED_TOPIC), payload=data)
         # ---
 
     def on_camera_add(self, *args):
+        # ---
         self.start_tethring()
         # ---
         data = json.dumps(args)
+        # ---
         tmp_dct = json.loads(data)
+        # ---
         tmp_dct[0]["camera_id"] = self.camera.eosserialnumber
         tmp_dct[0]["gateway"] = self.ip_adress
+        tmp_dct[0]["camera_order"] = self.camera.order
+        # ---
         data = json.dumps(tmp_dct[0])
+        # ---
         print('camera_add', data)
         # ---
         self.dispatch_event(topic=str(PyCamFi.CAMFI_CAMERA_ADDED_TOPIC), payload=data)
         # ---
 
     def on_file_added(self, *args):
+        # ---
         self.start_tethring()
         # ---
         data = json.dumps(args)
+        # ---
         tmp_dct = json.loads(data)
-        transform_dict = {"camera_id": self.camera.eosserialnumber, "gateway": self.ip_adress, "file_added": tmp_dct[0]}
+        # ---
+        transform_dict = dict(camera_id=self.camera.eosserialnumber, gateway=self.ip_adress,
+                              camera_order=self.camera.order, file_added=tmp_dct[0])
+        # ---
         data = json.dumps(transform_dict)
+        # ---
         print('file_added', data)
         # ---
         self.dispatch_event(topic=str(PyCamFi.CAMFI_FILE_ADDED_TOPIC), payload=data)
@@ -254,7 +307,7 @@ class PyCamFi(EdgeService):
     ## GET /raw/$filepath
     Téléchargez le fichier d'origine de la caméra sur le client.
     
-    $filepathIl est basé sur le chemin de la photo renvoyé dans la commande list. Il doit être encodé en URL lors de sa transmission. Le format de codage est le suivant:
+    $filepath Il est basé sur le chemin de la photo renvoyé dans la commande list. Il doit être encodé en URL lors de sa transmission. Le format de codage est le suivant:
     % 2Fstorage001% 2FDCIM% 2Fxxxx1.jpg.
     
     La taille du fichier peut être obtenue dans l'auditeur renvoyé Content-Length: xxxx.

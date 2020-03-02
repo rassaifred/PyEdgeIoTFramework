@@ -5,4 +5,7 @@ class PyDSLR:
         self.deviceversion = ""
         self.eosserialnumber = ""
         self.serialnumber = ""
-        print("init camera")
+        self.order = 0
+        # ---
+        # print("init camera")
+        # ---
