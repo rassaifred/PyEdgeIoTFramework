@@ -1,10 +1,15 @@
 """
 ToDo: ok - verify if camfi-adress
 ToDo: extract scan ip methodes to PyNetworkScan
-ToDo: add Dispatch Camera Added Event to trigger Order send form front
+ToDo: add Dispatch Camera Added Event
+ToDo: subscribe to listen trigger Set_Order send from front
+ToDo: subscribe to set_camera mqtt
+ToDo: subscribe to set_matrix_order mqtt
+ToDo: add Environment VAR for matrix_cameras_number
 ToDo: add camera order
 ToDo: add loading file_added
 ToDo: add Dispatch photo downloaded event
+ToDo: add fail scenarios
 """
 
 import json
@@ -23,6 +28,7 @@ class PyCamFiMatrix(EdgeService):
         super().__init__()
         # ----
         self.matrix_len = 1
+        self.matrix_orders = {}
         self.matrix_root_path = ""
         self.matrix_sequences_date = ""
         self.matrix_sequences_iteration = 0
@@ -110,6 +116,23 @@ class PyCamFiMatrix(EdgeService):
             return True
         else:
             return False
+
+    def set_matrix_camera_order(self, tmp_id=None, tmp_order=None):
+        pass
+
+    def set_matrix_orders(self, data=None):
+        pass
+    # ----------------------------------------------------
+    #            TOPIC's
+    # ------------------------------------
+
+    # COMMMANS
+    SET_CAMERA_ORDER_TOPIC = "SET_CAMERA_ORDER_TOPIC"
+    SET_MATRIX_ORDERS_TOPIC = "SET_MATRIX_ORDERS_TOPIC"
+    SET_MATRIX_CAMERAS_NUMBER_TOPIC = "SET_MATRIX_CAMERAS_NUMBER_TOPIC"
+
+    # EVENTS
+    MATRIX_EROOR_TOPIC = "MATRIX_EROOR_TOPIC"
 
     # ----------------------------------------------------
     #                   SCAN IPs

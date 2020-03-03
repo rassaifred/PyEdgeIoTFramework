@@ -45,55 +45,93 @@ class PyCamFi(EdgeService):
         data = self.get_camera_config()
         # ----
         if data:
-            try:
+            # ---
+            if data["main"]["children"]["status"]["children"]["cameramodel"]["value"]:
                 # x.main.children.status.children.cameramodel.value
                 self.camera.cameramodel = data["main"]["children"]["status"]["children"]["cameramodel"]["value"]
+            # ---
+            if data["main"]["children"]["status"]["children"]["deviceversion"]["value"]:
                 self.camera.deviceversion = data["main"]["children"]["status"]["children"]["deviceversion"]["value"]
+            # ---
+            if data["main"]["children"]["status"]["children"]["eosserialnumber"]["value"]:
                 self.camera.eosserialnumber = data["main"]["children"]["status"]["children"]["eosserialnumber"]["value"]
+                # ---
+                self.camera.set_camera_order_from_config_name(
+                    #   x.main.children.settings.children.artist.value
+                    data["main"]["children"]["settings"]["children"]["artist"]["value"]
+                )
+                # ---
+            # ---
+            if data["main"]["children"]["status"]["children"]["serialnumber"]["value"]:
                 self.camera.serialnumber = data["main"]["children"]["status"]["children"]["serialnumber"]["value"]
-            except:
-                pass
+            # ---
+
+            # ----
+            # set copyright value as eosserialnumber in camera via camfi
+            # ----
+            self.put_camera_config(
+                config_name=self.REST_API_CAMFI_COPYRIGHT_CONFIG_NAME,
+                config_value=self.camera.eosserialnumber
+            )
         # ----
         # get camfi info
         # ----
         info_data = self.get_camfi_info()
         # ----
         if info_data:
-            try:
+
+            if info_data["version"]:
                 self.version = info_data["version"]
+
+            if info_data["serial"]:
                 self.serial = info_data["serial"]
+
+            if info_data["used"]:
                 self.used = float(info_data["used"])
-                # ---
-                data = json.dumps(
-                    dict(camera_id=self.camera.eosserialnumber, gateway=self.ip_adress, camera_order=self.camera.order)
-                )
-                # ---
-                print('camera_add', data)
-                # ---
-                self.dispatch_event(topic=str(PyCamFi.CAMFI_CAMERA_ADDED_TOPIC), payload=data)
-            except:
-                pass
-        # ----
-        # add socket Client
-        # ----
-        self.socketIO = SocketIO(self.ip_adress, PyCamFi.SOCKET_CAMFI_PORT, LoggingNamespace)
-        self.socketIO.on('connect', self.on_connect)
+            # ---
+            data = json.dumps(
+                dict(camera_id=self.camera.eosserialnumber, gateway=self.ip_adress, camera_order=self.camera.order)
+            )
+            # ---
+            print('camera_add', data)
+            # ---
+            self.dispatch_event(topic=str(PyCamFi.CAMFI_CAMERA_ADDED_TOPIC), payload=data)
+
+            # ----
+            # add socket Client
+            # ----
+            self.socketIO = SocketIO(self.ip_adress, PyCamFi.SOCKET_CAMFI_PORT, LoggingNamespace)
+            self.socketIO.on('connect', self.on_connect)
+            # ---
+            self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_CAMERA_REMOVE, self.on_camera_remove)
+            self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_CAMERA_ADD, self.on_camera_add)
+            self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_FILE_ADDED, self.on_file_added)
+            self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_LIVESHOW_ERROR, self.on_liveshow_error)
+            self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_TIMELAPSE_ERROR, self.on_timelaspe_error)
+            # ---
+            self.socketIO.on('disconnect', self.on_disconnect)
+            self.socketIO.on('reconnect', self.on_reconnect)
+            # ----
+            self.socketIO.wait()
+            # ----
+            # start tethring
+            # ----
+            self.start_tethring()
+            # ----
+
+    # ----------------------------------------------------
+    #                   Methodes
+    # ----------------------------------------------------
+
+    def set_camera_order(self, tmp_order=None):
         # ---
-        self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_CAMERA_REMOVE, self.on_camera_remove)
-        self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_CAMERA_ADD, self.on_camera_add)
-        self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_FILE_ADDED, self.on_file_added)
-        self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_LIVESHOW_ERROR, self.on_liveshow_error)
-        self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_TIMELAPSE_ERROR, self.on_timelaspe_error)
-        # ---
-        self.socketIO.on('disconnect', self.on_disconnect)
-        self.socketIO.on('reconnect', self.on_reconnect)
-        # ----
-        self.socketIO.wait()
-        # ----
-        # start tethring
-        # ----
-        self.start_tethring()
-        # ----
+        if tmp_order:
+            # ---
+            self.camera.order = int(tmp_order)
+            # ---
+            # set camera order info over camfi
+            # ---
+            self.put_camera_config(config_name=self.REST_API_CAMFI_ARTIST_CONFIG_NAME, config_value=str(tmp_order))
 
     # ----------------------------------------------------
     #                   REST API
@@ -113,19 +151,34 @@ class PyCamFi(EdgeService):
         r = requests.get(get_url)
         return r.json()
 
+    def put_camera_config(self, tmp_ip=None, config_name=None, config_value=None):
+        if not tmp_ip:
+            tmp_ip = self.ip_adress
+
+        put_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_PUT_CONFIG_VALUE)
+        headers = {'Content-Type': 'application/json'}
+
+        tmp_dict = dict(name=config_name, value=config_value)
+
+        tmp_data = json.dumps(tmp_dict)
+
+        if config_name:
+            r = requests.put(put_url, data=tmp_data, headers=headers)
+            # return r.json()
+
     def start_tethring(self, tmp_ip=None):
         if not tmp_ip:
             tmp_ip = self.ip_adress
-        post_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_GET_TAKEPIC)
+        post_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_POST_TETHER_START)
         r = requests.post(post_url)
-        return r.json()
+        # return r.json()
 
     def stop_tethring(self, tmp_ip=None):
         if not tmp_ip:
             tmp_ip = self.ip_adress
         post_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_POST_TETHER_STOP)
         r = requests.post(post_url)
-        return r.json()
+        # return r.json()
 
     def get_photo_by_path(self, tmp_ip=None, path=None):
         if not tmp_ip:
@@ -211,6 +264,7 @@ class PyCamFi(EdgeService):
     CAMFI_CAMERA_ADDED_TOPIC = "CAMFI_CAMERA_ADDED"
     CAMFI_CAMERA_REMOVED_TOPIC = "CAMFI_CAMERA_REMOVED"
     CAMFI_FILE_ADDED_TOPIC = "CAMFI_FILE_ADDED"
+    CAMFI_ERROR_TOPIC = "CAMFI_ERROR_TOPIC"
 
     # ----------------------------------------------------
     #            SOCKET CONFIG
@@ -237,6 +291,13 @@ class PyCamFi(EdgeService):
     SOCKET_CAMFI_EVENT_FOCUS_TRACKING_ERROR = "focusstacking_error"
     SOCKET_CAMFI_EVENT_STORE_ADDED = "store_added"
     SOCKET_CAMFI_EVENT_STORE_REMOVED = "store_removed"
+
+    # ----------------------------------------------------
+    #            CONFIG NAME
+    # ----------------------------------------------------
+
+    REST_API_CAMFI_COPYRIGHT_CONFIG_NAME = "copyright"
+    REST_API_CAMFI_ARTIST_CONFIG_NAME = "artist"
 
     # ----------------------------------------------------
     #            REST API
@@ -379,7 +440,8 @@ class PyCamFi(EdgeService):
     # Définir la configuration de la caméra
     ## PUT /setconfigvalue
     ### Paramètres: {name:foo, value:foo}
-    noms Configurer et les valeurs peuvent getconfigtrouver les résultats de la commande de retour. Les appareils photo Canon et Nikon diffèrent par leurs noms et valeurs de configuration.
+    Configurer et les valeurs peuvent get config trouver les résultats de la commande de retour. 
+    Les appareils photo Canon et Nikon diffèrent par leurs noms et valeurs de configuration.
     Renvoie: code d'état de réussite 200 OK, sinon code d'état 500.
     """
 
