@@ -1,11 +1,11 @@
 """
 ToDo: ok - get camfi infos
 ToDO: ok - get camera config
-ToDo: ok - add socket client camfi on PyCamFi
-ToDO: ok - add socket event handler on PyCamFi
+ToDo: ok - add socket client camfi on PyDSLRCamFiGateway
+ToDO: ok - add socket event handler on PyDSLRCamFiGateway
 ToDo: ok - add events listener -> subscribe to camfi events topics
+ToDo: ok - add eosserialnuber to copyright automatic form API
 ToDo: add losing camfi scenario
-ToDo: add eosserialnuber to copyright automatic form API
 """
 
 import requests
@@ -14,9 +14,10 @@ import json
 from socketIO_client import SocketIO, LoggingNamespace
 
 from PyEdgeIoTFramework.pyedgeiotframework.southbound.PyDSLRGateway import PyDSLRGateway
+from PyEdgeIoTFramework.pyedgeiotframework.southbound.PyDSLR import PyDSLR
 
 
-class PyCamFi(PyDSLRGateway):
+class PyDSLRCamFiGateway(PyDSLRGateway):
 
     def __init__(self):
         # ----
@@ -76,7 +77,7 @@ class PyCamFi(PyDSLRGateway):
         info_data = self.get_camfi_info()
         # ----
         if info_data:
-
+            # ----
             if info_data["version"]:
                 self.version = info_data["version"]
 
@@ -85,26 +86,26 @@ class PyCamFi(PyDSLRGateway):
 
             if info_data["used"]:
                 self.used = float(info_data["used"])
-            # ---
+            # ----
             data = json.dumps(
                 dict(camera_id=self.camera.eosserialnumber, gateway=self.ip_adress, camera_order=self.camera.order)
             )
-            # ---
+            # ----
             print('camera_add', data)
-            # ---
-            self.dispatch_event(topic=str(PyCamFi.CAMERA_ADDED_TOPIC), payload=data)
-
+            # ----
+            self.dispatch_event(topic=str(PyDSLR.CAMERA_ADDED_TOPIC), payload=data)
+            # ----
             # ----
             # add socket Client
             # ----
-            self.socketIO = SocketIO(self.ip_adress, PyCamFi.SOCKET_CAMFI_PORT, LoggingNamespace)
+            self.socketIO = SocketIO(self.ip_adress, PyDSLRCamFiGateway.SOCKET_CAMFI_PORT, LoggingNamespace)
             self.socketIO.on('connect', self.on_connect)
             # ---
-            self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_CAMERA_REMOVE, self.on_camera_remove)
-            self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_CAMERA_ADD, self.on_camera_add)
-            self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_FILE_ADDED, self.on_file_added)
-            self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_LIVESHOW_ERROR, self.on_liveshow_error)
-            self.socketIO.on(PyCamFi.SOCKET_CAMFI_EVENT_TIMELAPSE_ERROR, self.on_timelaspe_error)
+            self.socketIO.on(PyDSLRCamFiGateway.SOCKET_CAMFI_EVENT_CAMERA_REMOVE, self.on_camera_remove)
+            self.socketIO.on(PyDSLRCamFiGateway.SOCKET_CAMFI_EVENT_CAMERA_ADD, self.on_camera_add)
+            self.socketIO.on(PyDSLRCamFiGateway.SOCKET_CAMFI_EVENT_FILE_ADDED, self.on_file_added)
+            self.socketIO.on(PyDSLRCamFiGateway.SOCKET_CAMFI_EVENT_LIVESHOW_ERROR, self.on_liveshow_error)
+            self.socketIO.on(PyDSLRCamFiGateway.SOCKET_CAMFI_EVENT_TIMELAPSE_ERROR, self.on_timelaspe_error)
             # ---
             self.socketIO.on('disconnect', self.on_disconnect)
             self.socketIO.on('reconnect', self.on_reconnect)
@@ -126,11 +127,24 @@ class PyCamFi(PyDSLRGateway):
         # ---
         if tmp_order:
             # ---
-            self.camera.order = int(tmp_order)
-            # ---
             # set camera order info over camfi
             # ---
             self.put_camera_config(config_name=self.REST_API_CAMFI_ARTIST_CONFIG_NAME, config_value=str(tmp_order))
+
+    def get_photo_from_camera(self, payload=None):
+        # ----
+        super().get_photo_from_camera(payload=payload)
+        # ----
+        tmp_file_added_path = payload["file_added"]
+        # ---
+        photo_data = self.get_raw_file(
+            tmp_ip=self.ip_adress,
+            path=tmp_file_added_path
+        )
+        # ---
+        if photo_data:
+            self.save_photo_from_camera(tmp_data=photo_data)
+        # ----
 
     # ----------------------------------------------------
     #                   REST API
@@ -139,14 +153,14 @@ class PyCamFi(PyDSLRGateway):
     def get_camfi_info(self, tmp_ip=None):
         if not tmp_ip:
             tmp_ip = self.ip_adress
-        get_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_GET_INFO)
+        get_url = "{}{}{}".format(PyDSLRCamFiGateway.REST_API_CAMFI_PROTOCOL, tmp_ip, PyDSLRCamFiGateway.REST_API_CAMFI_GET_INFO)
         r = requests.get(get_url)
         return r.json()
 
     def get_camera_config(self, tmp_ip=None):
         if not tmp_ip:
             tmp_ip = self.ip_adress
-        get_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_GET_CONFIG)
+        get_url = "{}{}{}".format(PyDSLRCamFiGateway.REST_API_CAMFI_PROTOCOL, tmp_ip, PyDSLRCamFiGateway.REST_API_CAMFI_GET_CONFIG)
         r = requests.get(get_url)
         return r.json()
 
@@ -154,7 +168,7 @@ class PyCamFi(PyDSLRGateway):
         if not tmp_ip:
             tmp_ip = self.ip_adress
 
-        put_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_PUT_CONFIG_VALUE)
+        put_url = "{}{}{}".format(PyDSLRCamFiGateway.REST_API_CAMFI_PROTOCOL, tmp_ip, PyDSLRCamFiGateway.REST_API_CAMFI_PUT_CONFIG_VALUE)
         headers = {'Content-Type': 'application/json'}
 
         tmp_dict = dict(name=config_name, value=config_value)
@@ -168,22 +182,22 @@ class PyCamFi(PyDSLRGateway):
     def start_tethring(self, tmp_ip=None):
         if not tmp_ip:
             tmp_ip = self.ip_adress
-        post_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_POST_TETHER_START)
+        post_url = "{}{}{}".format(PyDSLRCamFiGateway.REST_API_CAMFI_PROTOCOL, tmp_ip, PyDSLRCamFiGateway.REST_API_CAMFI_POST_TETHER_START)
         r = requests.post(post_url)
         # return r.json()
 
     def stop_tethring(self, tmp_ip=None):
         if not tmp_ip:
             tmp_ip = self.ip_adress
-        post_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_POST_TETHER_STOP)
+        post_url = "{}{}{}".format(PyDSLRCamFiGateway.REST_API_CAMFI_PROTOCOL, tmp_ip, PyDSLRCamFiGateway.REST_API_CAMFI_POST_TETHER_STOP)
         r = requests.post(post_url)
         # return r.json()
 
-    def get_photo_by_path(self, tmp_ip=None, path=None):
+    def get_raw_file(self, tmp_ip=None, path=None):
         if not tmp_ip:
             tmp_ip = self.ip_adress
         if path:
-            get_url = "{}{}{}".format(PyCamFi.REST_API_CAMFI_PROTOCOL, tmp_ip, PyCamFi.REST_API_CAMFI_GET_RAW_FILE,
+            get_url = "{}{}{}".format(PyDSLRCamFiGateway.REST_API_CAMFI_PROTOCOL, tmp_ip, PyDSLRCamFiGateway.REST_API_CAMFI_GET_RAW_FILE,
                                       urllib.parse.quote(path))
             r = requests.get(get_url)
             return r
@@ -210,7 +224,7 @@ class PyCamFi(PyDSLRGateway):
         )
         print('camera_remove', data)
         # ---
-        self.dispatch_event(topic=str(PyCamFi.CAMERA_REMOVED_TOPIC), payload=data)
+        self.dispatch_event(topic=str(PyDSLR.CAMERA_REMOVED_TOPIC), payload=data)
         # ---
 
     def on_camera_add(self, *args):
@@ -229,7 +243,7 @@ class PyCamFi(PyDSLRGateway):
         # ---
         print('camera_add', data)
         # ---
-        self.dispatch_event(topic=str(PyCamFi.CAMERA_ADDED_TOPIC), payload=data)
+        self.dispatch_event(topic=str(PyDSLR.CAMERA_ADDED_TOPIC), payload=data)
         # ---
 
     def on_file_added(self, *args):
@@ -240,15 +254,43 @@ class PyCamFi(PyDSLRGateway):
         # ---
         tmp_dct = json.loads(data)
         # ---
+        tmp_file_added_path = tmp_dct[0]
+        # ---
         transform_dict = dict(camera_id=self.camera.eosserialnumber, gateway=self.ip_adress,
-                              camera_order=self.camera.order, file_added=tmp_dct[0])
+                              camera_order=self.camera.order, file_added=tmp_file_added_path)
         # ---
         data = json.dumps(transform_dict)
         # ---
-        print('file_added', data)
+        self.dispatch_event(topic=str(PyDSLR.FILE_ADDED_TOPIC), payload=data)
         # ---
-        self.dispatch_event(topic=str(PyCamFi.FILE_ADDED_TOPIC), payload=data)
-        # ---
+        self.get_photo()
+
+        """
+        tmp_dct = json.loads(payload)
+        # ----
+        gateway_ip = tmp_dct["gateway"]
+        file_added = tmp_dct["file_added"]
+        camera_order = tmp_dct["camera_order"]
+        # ----
+        response = PyDSLRCamFiGateway.get_photo_by_path(None, tmp_ip=gateway_ip, path=file_added)
+        # ----
+        if response.status_code == 200:
+            # ----
+            pass
+            # ----            
+            file_save_url = "{}/{}/{}_{}.JPG".format(
+                self.local_photo_folder_path,
+                self.matrix_sequences_date,
+                camera_order,
+                self.photo_number
+            )
+            # ----
+            with open(file_save_url, 'wb') as f:
+                f.write(response.content)
+                # ---
+                # Dispatch photo downloaded event
+                # ---            
+        """
 
     def on_liveshow_error(self, *args):
         print('liveshow_error', args)
