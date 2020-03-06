@@ -1,4 +1,5 @@
 """
+ToDo: ok - add DSLR_Gateway class as parent of every gateway, e.g: PyCamFi
 ToDo: ok - verify if camfi-adress
 ToDo: extract scan ip methodes to PyNetworkScan
 ToDo: add Dispatch Camera Added Event
@@ -17,11 +18,11 @@ import os
 import multiprocessing
 import subprocess
 
-from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
-from PyEdgeIoTFramework.pyedgeiotframework.southbound.PyCamFi import PyCamFi
+from PyEdgeIoTFramework.pyedgeiotframework.northbound.PyDSLRMatrix import PyDSLRMatrix
+from PyEdgeIoTFramework.pyedgeiotframework.southbound.PyDSLRCamFi import PyCamFi
 
 
-class PyCamFiMatrix(EdgeService):
+class PyCamFiMatrix(PyDSLRMatrix):
 
     def __init__(self):
         # ----
@@ -35,35 +36,19 @@ class PyCamFiMatrix(EdgeService):
         # ----
         self.matrix_base_ip = "192" + '.' + "168" + '.9.'
         # ----
-        self.cafmi_list = []
-        # ----
+        self.ips_list = []
 
     def run(self) -> None:
         # ----
         super().run()
         # ----
-        self.subscribe_command(
-            callback=self.camera_added_callback,
-            topic=PyCamFi.CAMFI_CAMERA_ADDED_TOPIC
-        )
-
-        self.subscribe_command(
-            callback=self.camera_removed_callback,
-            topic=PyCamFi.CAMFI_CAMERA_REMOVED_TOPIC
-        )
-
-        self.subscribe_command(
-            callback=self.file_added_callback,
-            topic=PyCamFi.CAMFI_FILE_ADDED_TOPIC
-        )
+        self.ips_list = self.map_network()
         # ----
-        self.cafmi_list = self.map_network()
-        # ----
-        # print(cafmi_list)
+        # print(ips_list)
         # ----
         itt = 1
         # ----
-        for c_ip in self.cafmi_list:
+        for c_ip in self.ips_list:
             # ---
             # for x in range(0, 29):
             # ---
@@ -72,16 +57,24 @@ class PyCamFiMatrix(EdgeService):
             camfi.ip_adress = c_ip
             camfi.start()
             # ---
+            self.gatways_list.append(camfi)
+            # ---
             itt += 1
             # ---
 
     def camera_added_callback(self, payload=None):
-        pass
+        # ----
+        super().camera_added_callback(payload=payload)
+        # ----
 
     def camera_removed_callback(self, payload=None):
-        pass
+        # ----
+        super().camera_removed_callback(payload=payload)
+        # ----
 
     def file_added_callback(self, payload=None):
+        # ----
+        super().file_added_callback(payload=payload)
         # ----
         tmp_dct = json.loads(payload)
         # ----
@@ -118,21 +111,10 @@ class PyCamFiMatrix(EdgeService):
             return False
 
     def set_matrix_camera_order(self, tmp_id=None, tmp_order=None):
-        pass
+        super().set_matrix_camera_order(tmp_id=tmp_id, tmp_order=tmp_order)
 
     def set_matrix_orders(self, data=None):
-        pass
-    # ----------------------------------------------------
-    #            TOPIC's
-    # ------------------------------------
-
-    # COMMMANS
-    SET_CAMERA_ORDER_TOPIC = "SET_CAMERA_ORDER_TOPIC"
-    SET_MATRIX_ORDERS_TOPIC = "SET_MATRIX_ORDERS_TOPIC"
-    SET_MATRIX_CAMERAS_NUMBER_TOPIC = "SET_MATRIX_CAMERAS_NUMBER_TOPIC"
-
-    # EVENTS
-    MATRIX_EROOR_TOPIC = "MATRIX_EROOR_TOPIC"
+        super().set_matrix_orders(data=data)
 
     # ----------------------------------------------------
     #                   SCAN IPs

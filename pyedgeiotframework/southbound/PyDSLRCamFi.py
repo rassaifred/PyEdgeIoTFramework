@@ -5,7 +5,7 @@ ToDo: ok - add socket client camfi on PyCamFi
 ToDO: ok - add socket event handler on PyCamFi
 ToDo: ok - add events listener -> subscribe to camfi events topics
 ToDo: add losing camfi scenario
-ToDo: add eosserialnuber to copyright automatic form REST API
+ToDo: add eosserialnuber to copyright automatic form API
 """
 
 import requests
@@ -13,24 +13,21 @@ import urllib.parse
 import json
 from socketIO_client import SocketIO, LoggingNamespace
 
-from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
-from PyEdgeIoTFramework.pyedgeiotframework.southbound.PyDSLR import PyDSLR
+from PyEdgeIoTFramework.pyedgeiotframework.southbound.PyDSLRGateway import PyDSLRGateway
 
 
-class PyCamFi(EdgeService):
+class PyCamFi(PyDSLRGateway):
 
     def __init__(self):
         # ----
         super().__init__()
         # ----
-        self.camera = PyDSLR()
-        # ----
-        self.ip_adress = "0.0.0.0"
+        # self.ip_adress = "0.0.0.0"
         self.version = "0"
         self.serial = "0"
         self.used = .0
         self.SSID = "-"
-        self.mac = "-"
+        # self.mac = "-"
         self.network_mode = "-"
         # ----
         self.socketIO = None
@@ -95,7 +92,7 @@ class PyCamFi(EdgeService):
             # ---
             print('camera_add', data)
             # ---
-            self.dispatch_event(topic=str(PyCamFi.CAMFI_CAMERA_ADDED_TOPIC), payload=data)
+            self.dispatch_event(topic=str(PyCamFi.CAMERA_ADDED_TOPIC), payload=data)
 
             # ----
             # add socket Client
@@ -124,6 +121,8 @@ class PyCamFi(EdgeService):
     # ----------------------------------------------------
 
     def set_camera_order(self, tmp_order=None):
+        # ---
+        super(self).set_camera_order(tmp_order)
         # ---
         if tmp_order:
             # ---
@@ -211,7 +210,7 @@ class PyCamFi(EdgeService):
         )
         print('camera_remove', data)
         # ---
-        self.dispatch_event(topic=str(PyCamFi.CAMFI_CAMERA_REMOVED_TOPIC), payload=data)
+        self.dispatch_event(topic=str(PyCamFi.CAMERA_REMOVED_TOPIC), payload=data)
         # ---
 
     def on_camera_add(self, *args):
@@ -230,7 +229,7 @@ class PyCamFi(EdgeService):
         # ---
         print('camera_add', data)
         # ---
-        self.dispatch_event(topic=str(PyCamFi.CAMFI_CAMERA_ADDED_TOPIC), payload=data)
+        self.dispatch_event(topic=str(PyCamFi.CAMERA_ADDED_TOPIC), payload=data)
         # ---
 
     def on_file_added(self, *args):
@@ -248,7 +247,7 @@ class PyCamFi(EdgeService):
         # ---
         print('file_added', data)
         # ---
-        self.dispatch_event(topic=str(PyCamFi.CAMFI_FILE_ADDED_TOPIC), payload=data)
+        self.dispatch_event(topic=str(PyCamFi.FILE_ADDED_TOPIC), payload=data)
         # ---
 
     def on_liveshow_error(self, *args):
@@ -256,15 +255,6 @@ class PyCamFi(EdgeService):
 
     def on_timelaspe_error(self, *args):
         print('timelaspe_error', args)
-
-    # ----------------------------------------------------
-    #            TOPIC's
-    # ----------------------------------------------------
-
-    CAMFI_CAMERA_ADDED_TOPIC = "CAMFI_CAMERA_ADDED"
-    CAMFI_CAMERA_REMOVED_TOPIC = "CAMFI_CAMERA_REMOVED"
-    CAMFI_FILE_ADDED_TOPIC = "CAMFI_FILE_ADDED"
-    CAMFI_ERROR_TOPIC = "CAMFI_ERROR_TOPIC"
 
     # ----------------------------------------------------
     #            SOCKET CONFIG
