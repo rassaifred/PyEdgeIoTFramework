@@ -31,6 +31,10 @@ class PyDSLR:
         # print("init camera")
         # ----
 
+    # ----------------------------------------------------
+    #                   Methodes
+    # ----------------------------------------------------
+
     def set_camera_order_from_config_name(self, config_name=None):
         """
         Camera details from artist/author menu config
@@ -50,6 +54,7 @@ class PyDSLR:
             self.order = int(re.findall(reg_query, config_name)[0])
 
     def save_photo_loadded_from_camera(self, tmp_num_photo=None, tmp_photo_data=None):
+
         # ----
         self.photo_date_str = date.today().strftime("%d_%m_%y")
         # ----
@@ -66,6 +71,11 @@ class PyDSLR:
             # ----
             print("start saving file {}".format(save_path))
             # ----
+            with open(save_path, 'wb') as f:
+                f.write(tmp_photo_data.content)
+                # ---
+                # Dispatch photo downloaded event
+                # ---
             # ---- dispatch camera photo loaded
         # ----
 

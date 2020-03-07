@@ -78,7 +78,7 @@ class PyMqttClient(EdgeService):
     def on_connect(self, client, userdata, flags, rc):
         print("Mqtt Connected with result code {0} to brocker: {1} at adress: {2}".format(str(rc), self.BROCKER_NAME,
                                                                                           self.MQTT_BROCKER_ADRESS))
-        # Subscribing in on_connect() means that if we lose the connection and
+        # Subscribing in on_camfi_socket_connect() means that if we lose the connection and
         # reconnect then subscriptions will be renewed.
         # client.subscribe("$SYS/#")
         # client.subscribe("#")

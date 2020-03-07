@@ -51,8 +51,12 @@ class PyDSLRMatrix(EdgeService):
             topic=PyDSLR.FILE_ADDED_TOPIC
         )
         # ----
-        self.scan_dslr_gateways()
+        self.gateways_ips_list = self.scan_dslr_gateways()
         # ----
+
+    # ----------------------------------------------------
+    #                   Methodes
+    # ----------------------------------------------------
 
     def validate_gateway(self, tmp_ip):
         # ----
@@ -78,7 +82,7 @@ class PyDSLRMatrix(EdgeService):
         # ----
         print("scan_dslr_gateways")
         # ----
-        self.gateways_ips_list = self.map_network()
+        return self.map_network()
         # ----
 
     def get_gateway_by_ip(self, tmp_ip) -> PyDSLRGateway:
@@ -106,13 +110,17 @@ class PyDSLRMatrix(EdgeService):
     # ----------------------------------------------------
 
     def pinger(self, job_q, results_q):
+        # ----
         DEVNULL = open(os.devnull, 'w')
+        # ----
         while True:
+            # ----
             ip = job_q.get()
+            # ----
             if ip is None:
                 break
             # ----
-            # print("ip pinger: {} command: {}".format(ip,['ping', '-c1', ip]))
+            print("ip pinger: {} command: {}".format(ip,['ping', '-c1', ip]))
             # ----
             try:
                 subprocess.check_call(['ping', '-c1', ip], stdout=DEVNULL)
@@ -143,7 +151,7 @@ class PyDSLRMatrix(EdgeService):
             p.start()
 
         # cue hte ping processes
-        for i in range(66, 69):  # range(1, 256):
+        for i in range(66, 70):  # range(1, 256):
             jobs.put(self.gateways_base_ip + '{0}'.format(i))
 
         for p in pool:

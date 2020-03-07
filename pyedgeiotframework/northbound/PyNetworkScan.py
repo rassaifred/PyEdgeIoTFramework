@@ -7,12 +7,8 @@ ToDo: scenario ->
         - contious scan network every interval
 """
 
-import os
-import socket
-import multiprocessing
-import subprocess
-import pycurl
-from io import BytesIO
+# Importing Modules
+import os, multiprocessing, time, platform
 
 from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
 
@@ -23,118 +19,164 @@ class PyNetworkScan(EdgeService):
         # ----
         super().__init__()
         # ----
-        self.cafmi_list = []
+        self.base_ip = "192:168:1:1-255"
+        # ----
+        self.thread = 100
+        self.timeout = 1
+        # ----
+        self.ips_list = []
         # ----
 
     def run(self) -> None:
         # ----
         super().run()
         # ----
-        self.cafmi_list = self.map_network()
+        Pinger(
+            target=IP_extractor(self.base_ip),
+            thread=self.thread,
+            timeout=self.timeout
+        )
         # ----
-        # print(cafmi_list)
-        # ----
-        for c_ip in self.cafmi_list:
-            camfi = PyCamFi()
-            camfi.ip_adress = c_ip
-            camfi.start()
 
-    def pinger(self, job_q, results_q):
-        DEVNULL = open(os.devnull, 'w')
-        while True:
+    # ----------------------------------------------------
+    #            TOPIC's
+    # ----------------------------------------------------
 
-            ip = job_q.get()
+    IP_LIVE_FIND_TOPIC = "IP_LIVE_FIND"
 
-            if ip is None:
-                break
+# Main Engine
+class Pinger:
+    def __init__(self, target=None, thread=None, output=None, timeout=None):
+        self.commad = ""
+        self.timestarted = time.time()
+        self.live_ip_collector = multiprocessing.Queue()
+        self.target = target
+        self.thread = thread
+        self.output = output
+        self.timeout = timeout
+        self.set_os_command()
+        # self.checkping()
+        self.scanning_boosters()
 
+    # Saving OUtput
+    def save_output(self):
+        f = open(self.output, 'a')
+        for i in self.live_ip_collector:
+            f.write(i + '\n')
+        f.close()
+        return
+
+    # Function For Multi_processing
+    def scanning_boosters(self):
+        proces = []
+        for ip in self.target:
+            k = len(multiprocessing.active_children())
+            if k == self.thread:
+                time.sleep(3)
+                self.thread = self.thread + 30
+            mythread = multiprocessing.Process(target=self.checkping, args=(ip,))
+            mythread.start()
+            proces.append(mythread)
+
+        for mythread in proces:
+            mythread.join()
+
+        self.timeclose = time.time()
+
+        print("end")
+
+        self.showing_results()
+
+        return
+
+    # Printing Function
+    def showing_results(self):
+        storeip = []
+        x = 1
+        while x == 1:
             try:
-                subprocess.check_call(['ping', '-c1', ip],
-                                      stdout=DEVNULL)
-                results_q.put(ip)
+                storeip.append(self.live_ip_collector.get_nowait())
             except:
-                pass
+                x = x + 1
+        self.live_ip_collector = storeip
 
-    def map_network(self, pool_size=1):  # (pool_size=255):
-        """
-        Maps the network
-        :param pool_size: amount of parallel ping processes
-        :return: list of valid ip addresses
-        """
+        print("\n" * 3, "#" * 80)
+        print("[+] Scan Started On \t\t:\t", time.ctime(self.timestarted))
+        print("[+] Scan Closed On  \t\t:\t", time.ctime(self.timeclose))
+        print("[+] Scan Total Duration \t:\t", self.timeclose - self.timestarted)
+        print("[+] Total Live System Answered\t:\t", len(self.live_ip_collector))
 
-        ip_list = list()
+        if self.output:
+            self.save_output()
 
-        # compose a base like 192.168.1.xxx
-        base_ip = "192" + '.' + "168" + '.9.'
+        print("\n[+] Thanks For Using My Program. By S.S.B")
 
-        # prepare the jobs queue
-        jobs = multiprocessing.Queue()
-        results = multiprocessing.Queue()
+        return
 
-        pool = [multiprocessing.Process(target=self.pinger, args=(jobs, results)) for i in range(pool_size)]
+    # Command Selecting Function
+    def set_os_command(self):
+        oper = platform.system()
+        if oper == "Windows":
+            ping = "ping -n {} {}"
+        elif oper == "Linux":
+            ping = "ping -c {} {}"
+        else:
+            ping = "ping -c {} {}"
+        self.commad = ping
+        return
 
-        for p in pool:
-            p.start()
+    # Function for Checking IP Status
+    def checkping(self, ip):
+        print("[+]\t {}".format(ip))
+        ping = self.commad
+        recv = os.popen(ping.format(self.timeout, ip)).read()
+        recv = recv.upper()
+        if recv.count('TTL'):
+            print("[+]\t {} \t==> Live ".format(ip))
+            self.live_ip_collector.put(ip)
+        return
 
-        # cue hte ping processes
-        for i in range(1, 256):  # range(1, 256):
-            jobs.put(base_ip + '{0}'.format(i))
 
-        for p in pool:
-            jobs.put(None)
+# Extracting Number format
+def extraction(port):
+    storeport = []
+    # Verifiying Port Value
+    if port:
+        # Verifying Port is in Range
+        if "-" in port and "," not in port:
+            x1, x2 = port.split('-')
+            storeport = range(int(x1), int(x2))
+        # Verifying Port is in Commas
+        elif "," in port and "-" not in port:
+            storeport = port.split(',')
+        elif "," in port and "-" in port:
+            x2 = []
+            for i in port.split(','):
+                if '-' in i:
+                    y1, y2 = i.split('-')
+                    x2 = x2 + range(int(y1), int(y2))
+                else:
+                    x2.append(i)
+            storeport = x2
+        else:
+            storeport.append(port)
+    else:
+        pass
+    return storeport
 
-        for p in pool:
-            p.join()
 
-        # collect he results
-        while not results.empty():
-            ip = results.get()
-            # ip_list.append(ip)
-            # ----
-            # creates a new socket using the given address family.
-            socket_obj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Extracting Ip Address
+def IP_extractor(ip):
+    storeobj = []
+    ip = ip.split(':')
+    x1 = extraction(ip[0])
+    x2 = extraction(ip[1])
+    x3 = extraction(ip[2])
+    x4 = extraction(ip[3])
+    for i1 in x1:
+        for i2 in x2:
+            for i3 in x3:
+                for i4 in x4:
+                    storeobj.append("{}.{}.{}.{}".format(i1, i2, i3, i4))
+    return storeobj
 
-            # setting up the default timeout in seconds for new socket object
-            socket.setdefaulttimeout(.3)
-
-            # returns 0 if connection succeeds else raises error
-            result = socket_obj.connect_ex((ip, SOCKET_CAMFI_PORT))  # address and port in the tuple format
-
-            # print(ip, "-", result)
-
-            # closes te object
-            socket_obj.close()
-
-            if result == 0:
-
-                url_str = "{}{}{}".format(REST_API_CAMFI_PROTOCOL, ip, REST_API_CAMFI_GET_INFO)
-
-                # print(url_str)
-
-                #
-                b_obj = BytesIO()
-                crl = pycurl.Curl()
-
-                # Set URL value
-                crl.setopt(crl.URL, url_str)
-
-                # Write bytes that are utf-8 encoded
-                crl.setopt(crl.WRITEDATA, b_obj)
-
-                # Perform a file transfer
-                crl.perform()
-
-                # End curl session
-                crl.close()
-
-                # Get the content stored in the BytesIO object (in byte characters)
-                get_body = b_obj.getvalue()
-
-                # Decode the bytes stored in get_body to HTML and print the result
-                # print('Output of GET request:\n%s' % get_body.decode('utf8'))
-
-                if get_body:
-                    #
-                    ip_list.append(ip)
-
-        return ip_list

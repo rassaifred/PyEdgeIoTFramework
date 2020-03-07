@@ -53,10 +53,14 @@ class PyCamFiMatrix(PyDSLRMatrix):
         # ----
         # verify ip
         # ----
-        # print("verify ip: {}".format(tmp_ip))
+        print("verify ip: {}".format(tmp_ip))
         # ----
-        data = json.dumps(PyDSLRCamFiGateway.get_camfi_info(None, tmp_ip=tmp_ip))
+        data = json.dumps(
+            PyDSLRCamFiGateway.get_camfi_info(None, tmp_ip=tmp_ip)
+        )
+        # ----
         tmp_dect = json.loads(data)
+        # ----
         if tmp_dect["version"]:
             return True
         else:

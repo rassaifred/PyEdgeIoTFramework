@@ -137,11 +137,11 @@ def explode_topic_to_namespace(tmp_topic: str):
 class EdgeClientNamespace(socketio.ClientNamespace):
 
     def on_connect(self):
-        print("EdgeClientNamespace on_connect ", self.namespace)
+        print("EdgeClientNamespace on_camfi_socket_connect ", self.namespace)
         pass
 
     def on_disconnect(self):
-        print("EdgeClientNamespace on_disconnect")
+        print("EdgeClientNamespace on_camfi_socket_disconnect")
         pass
 
     def on_message(self, msg=None):
