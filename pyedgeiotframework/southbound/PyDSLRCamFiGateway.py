@@ -170,7 +170,7 @@ class PyDSLRCamFiGateway(PyDSLRGateway):
         # ----
         # start tethring
         # ----
-        # self.start_tethring()
+        self.start_tethring()
         # ----
 
     # ----------------------------------------------------
@@ -359,7 +359,7 @@ class PyDSLRCamFiGateway(PyDSLRGateway):
             dict(
                 camera_id=self.camera.eosserialnumber,
                 gateway_ip=self.gateway_ip,
-                camera_order=self.camera.order
+                camera_order=self.camera.camera_order
             )
         )
         # ---

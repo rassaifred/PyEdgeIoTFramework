@@ -15,6 +15,7 @@ e.g:
     1_350_12_05_20.JPG
     -> filename = 1_350_12_05_20
     -> extension = JPG
+
 """
 import json
 import re
