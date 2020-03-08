@@ -19,7 +19,8 @@ class PyDSLRGateway(EdgeService):
         # ----
         self.camera = PyDSLR()
         # ----
-        self.ip_adress = "0.0.0.0"
+        self.gateways_base_ip = "192:168:1:1-255"
+        self.gateway_ip = "0.0.0.0"
         self.mac = "-"
         # ----
         self.photo_number = 0
@@ -36,18 +37,21 @@ class PyDSLRGateway(EdgeService):
 
     def set_camera_order(self, tmp_order=None):
         # ---
-        print("set Cmaera Order: {}".format(tmp_order))
+        # print("set Cmaera Order: {}".format(tmp_order))
         # ---
         if tmp_order:
             # ---
-            self.camera.order = int(tmp_order)
+            self.camera.camera_order = int(tmp_order)
             # ---
 
     def on_file_added(self, payload=None):
         # ----
         # print("file added payload: {}".format(payload))
         # ----
-        self.dispatch_event(topic=str(PyDSLR.FILE_ADDED_TOPIC), payload=payload)
+        self.dispatch_event(
+            topic=str(PyDSLR.FILE_ADDED_TOPIC),
+            payload=payload
+        )
         # ----
         photo_data = self.get_photo_from_camera(payload=payload)
         # ----
@@ -59,11 +63,13 @@ class PyDSLRGateway(EdgeService):
 
     def get_photo_from_camera(self, payload=None):
         # ----
-        print("get photo from camera: {}".format(payload))
+        # print("get photo from camera: {}".format(payload))
         # ----
+        pass
 
     # ----------------------------------------------------
     #            TOPIC's
     # ----------------------------------------------------
 
+    DSLR_GATEWAY_READY_TOPIC = "DSLR_GATEWAY_READY"
     DSLR_GATEWAY_ERROR_TOPIC = "DSLR_GATEWAY_ERROR"

@@ -2,61 +2,48 @@
 ToDo: extract scan ip methodes to PyNetworkScan
 ToDo: in PyNetworkScan dispatch an event whenever an ip is online to verify it
 ToDo: scenario ->
-        - first luanch scan and list on line ip
-        - dispatch ip findded
-        - contious scan network every interval
+        - first luanch scan and list live ips
+        - dispatch scan finished
 """
 
-# Importing Modules
+import json
 import os, multiprocessing, time, platform
 
-from PyEdgeIoTFramework.pyedgeiotframework.core.EdgeService import EdgeService
+from pubsub import pub
 
 
-class PyNetworkScan(EdgeService):
+class PyNetworkScan:
 
-    def __init__(self):
+    def __init__(self, target=None):
         # ----
-        super().__init__()
-        # ----
-        self.base_ip = "192:168:1:1-255"
-        # ----
-        self.thread = 100
-        self.timeout = 1
-        # ----
-        self.ips_list = []
-        # ----
-
-    def run(self) -> None:
-        # ----
-        super().run()
-        # ----
-        Pinger(
-            target=IP_extractor(self.base_ip),
-            thread=self.thread,
-            timeout=self.timeout
-        )
-        # ----
-
-    # ----------------------------------------------------
-    #            TOPIC's
-    # ----------------------------------------------------
-
-    IP_LIVE_FIND_TOPIC = "IP_LIVE_FIND"
-
-# Main Engine
-class Pinger:
-    def __init__(self, target=None, thread=None, output=None, timeout=None):
         self.commad = ""
-        self.timestarted = time.time()
         self.live_ip_collector = multiprocessing.Queue()
-        self.target = target
-        self.thread = thread
-        self.output = output
-        self.timeout = timeout
+        self.live_ip_list = []
+        self.thread = 255
+        self.timeout = 1
+        self.target = target if target else "192:168:1:1-255"
+        self.output = None
+        self.timestarted = None
+        self.timeclose = None
+        self.start_scan()
+
+    def start_scan(self):
+        self.timestarted = time.time()
         self.set_os_command()
-        # self.checkping()
         self.scanning_boosters()
+        # ----
+
+    @property
+    def target(self):
+        return self.__target
+
+    @target.setter
+    def target(self, target):
+        self.__target = IP_extractor(target)
+
+    # ----------------------------------------------------
+    #                   Methodes
+    # ----------------------------------------------------
 
     # Saving OUtput
     def save_output(self):
@@ -74,7 +61,10 @@ class Pinger:
             if k == self.thread:
                 time.sleep(3)
                 self.thread = self.thread + 30
-            mythread = multiprocessing.Process(target=self.checkping, args=(ip,))
+            mythread = multiprocessing.Process(
+                target=self.checkping,
+                args=(ip,)
+            )
             mythread.start()
             proces.append(mythread)
 
@@ -83,7 +73,7 @@ class Pinger:
 
         self.timeclose = time.time()
 
-        print("end")
+        # print("end")
 
         self.showing_results()
 
@@ -98,18 +88,35 @@ class Pinger:
                 storeip.append(self.live_ip_collector.get_nowait())
             except:
                 x = x + 1
+
         self.live_ip_collector = storeip
 
-        print("\n" * 3, "#" * 80)
+        self.timeclose = time.time()
+
+        print("\n" * 1)
+        print("#" * 80)
         print("[+] Scan Started On \t\t:\t", time.ctime(self.timestarted))
         print("[+] Scan Closed On  \t\t:\t", time.ctime(self.timeclose))
         print("[+] Scan Total Duration \t:\t", self.timeclose - self.timestarted)
         print("[+] Total Live System Answered\t:\t", len(self.live_ip_collector))
+        print("#" * 80, "\n" * 1)
 
         if self.output:
             self.save_output()
 
-        print("\n[+] Thanks For Using My Program. By S.S.B")
+        # ----
+        for i in self.live_ip_collector:
+            self.live_ip_list.append(i)
+        # ----
+        pub.sendMessage(
+            topicName=self.IP_LIVE_FINDED_TOPIC,
+            payload=json.dumps(
+                dict(
+                    live_ip=self.live_ip_list
+                )
+            )
+        )
+        # ----
 
         return
 
@@ -127,14 +134,26 @@ class Pinger:
 
     # Function for Checking IP Status
     def checkping(self, ip):
-        print("[+]\t {}".format(ip))
+        # ----
+        # print("[+]\t {}".format(ip))
+        # ----
         ping = self.commad
         recv = os.popen(ping.format(self.timeout, ip)).read()
         recv = recv.upper()
         if recv.count('TTL'):
-            print("[+]\t {} \t==> Live ".format(ip))
+            # ----
+            # print("[+]\t {} \t==> Live ".format(ip))
+            # ----
             self.live_ip_collector.put(ip)
+            # ----
+
         return
+
+    # ----------------------------------------------------
+    #            TOPIC's
+    # ----------------------------------------------------
+
+    IP_LIVE_FINDED_TOPIC = "IP_LIVE_FINDED"
 
 
 # Extracting Number format
@@ -179,4 +198,3 @@ def IP_extractor(ip):
                 for i4 in x4:
                     storeobj.append("{}.{}.{}.{}".format(i1, i2, i3, i4))
     return storeobj
-

@@ -1,4 +1,5 @@
 """
+
 ToDo: clean up
 ToDo: add subscribe_mqtt_topic --> mirror to --> PyPubSub
 
@@ -47,7 +48,7 @@ class PyMqttClient(EdgeService):
         # ----
         if len(self.MIROR_TOPICS_LIST) > 0:
             for mirror_topic_item in self.MIROR_TOPICS_LIST:
-                print("pypubsub subscribe to topic:{}".format(mirror_topic_item))
+                # print("pypubsub subscribe to topic:{}".format(mirror_topic_item))
                 # pub.subscribe(self.on_mirror_message, str(mirror_topic_item))
                 # ----
                 self.subscribe_command(
@@ -76,8 +77,9 @@ class PyMqttClient(EdgeService):
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc):
-        print("Mqtt Connected with result code {0} to brocker: {1} at adress: {2}".format(str(rc), self.BROCKER_NAME,
-                                                                                          self.MQTT_BROCKER_ADRESS))
+
+        # print("Mqtt Connected with result code {0} to brocker: {1} at adress: {2}".format(str(rc), self.BROCKER_NAME, self.MQTT_BROCKER_ADRESS))
+
         # Subscribing in on_camfi_socket_connect() means that if we lose the connection and
         # reconnect then subscriptions will be renewed.
         # client.subscribe("$SYS/#")
@@ -87,7 +89,7 @@ class PyMqttClient(EdgeService):
         # ----
         if len(self.TOPICS_LIST) > 0:
             for topic_item in self.TOPICS_LIST:
-                print("mqtt subscribe to topic:{}".format(topic_item))
+                # print("mqtt subscribe to topic:{}".format(topic_item))
                 self.client.subscribe(str(topic_item))
 
         # ----
