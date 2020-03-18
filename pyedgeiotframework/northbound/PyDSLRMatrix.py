@@ -1,9 +1,11 @@
 """
+
 ToDo: ok - extract scan ip functions to PyNetworkScan
 ToDo: ok - add PyNetworkScan based on test_ping.py
 ToDo: add plug&play feature with rescan gateways
 ToDo: add change photo number via PubSub
 ToDo: add timeout for staying adding photo
+
 """
 
 import json
@@ -21,11 +23,11 @@ class PyDSLRMatrix(EdgeService):
         # ----
         self.scanner = None
         # ----
-        self.gateways_base_ip = "192:168:1:1-255"
-        self.gateways_number = 1
-        self.gateways_list = []
+        self.camera_number = 1
         # ----
+        self.gateways_base_ip = "192:168:1:1-255"
         self.gateways_create_iterator = 0
+        self.gateways_list = []
         # ----
         self.local_photo_folder_path = ""
         # ----
@@ -35,6 +37,11 @@ class PyDSLRMatrix(EdgeService):
     def run(self) -> None:
         # ----
         super().run()
+        # ----
+        self.subscribe_command(
+            callback=self.gateway_ready_callback,
+            topic=PyDSLRGateway.DSLR_GATEWAY_READY_TOPIC
+        )
         # ----
         self.get_dslr_gateways()
         # ----
@@ -68,6 +75,7 @@ class PyDSLRMatrix(EdgeService):
         # print("create gateway payload: {}".format(payload))
         # ----
         pass
+        # ----
 
     def validate_gateway(self, payload=None):
         # ----
@@ -115,6 +123,14 @@ class PyDSLRMatrix(EdgeService):
                 self.create_gateway(payload=json.dumps(tmp_dict_item))
                 # ----
 
+    def gateway_ready_callback(self, payload=None):
+        # ----
+        tmp_gw_dict = json.loads(payload)
+        # ----
+        if tmp_gw_dict:
+            self.gateways_list.append(tmp_gw_dict)
+        # ----
+
     # ----------------------------------------------------
     #            TOPIC's
     # ------------------------------------
@@ -124,4 +140,5 @@ class PyDSLRMatrix(EdgeService):
     SET_MATRIX_CAMERAS_NUMBER_TOPIC = "SET_MATRIX_CAMERAS_NUMBER"
 
     # EVENTS
-    MATRIX_EROOR_TOPIC = "MATRIX_EROOR"
+    DSLR_MATRIX_READY_TOPIC = "DSLR_MATRIX_READY"
+    DSLR_MATRIX_EROOR_TOPIC = "DSLR_MATRIX_EROOR"

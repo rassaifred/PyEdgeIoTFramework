@@ -1,5 +1,12 @@
 """
-ToDo:
+ToDo: Make order and cameras numbers in config DSLR
+
+-----------------------
+order=6/14
+6 is order
+14 is count of cameras
+-----------------------
+
 
 camera payload json:
 {
